@@ -1,0 +1,109 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aitraders
+      POSTGRES_USER: aitraders
+      POSTGRES_PASSWORD: aitraders_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aitraders -d aitraders"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders
+      REDIS_URL: redis://redis:6379
+      AGENT_ENDPOINTS_JSON: "{\"market-data\":\"http://market-data-agent:7001\",\"strategy-research\":\"http://strategy-research-agent:7002\",\"risk\":\"http://risk-agent:7003\",\"execution\":\"http://execution-agent:7004\",\"post-trade-review\":\"http://post-trade-review-agent:7005\"}"
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      market-data-agent:
+        condition: service_started
+      strategy-research-agent:
+        condition: service_started
+      risk-agent:
+        condition: service_started
+      execution-agent:
+        condition: service_started
+      post-trade-review-agent:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  market-data-agent:
+    build:
+      context: .
+      dockerfile: agents/market-data/Dockerfile
+    ports:
+      - "7001:7001"
+
+  strategy-research-agent:
+    build:
+      context: .
+      dockerfile: agents/strategy-research/Dockerfile
+    ports:
+      - "7002:7002"
+
+  risk-agent:
+    build:
+      context: .
+      dockerfile: agents/risk/Dockerfile
+    ports:
+      - "7003:7003"
+
+  execution-agent:
+    build:
+      context: .
+      dockerfile: agents/execution/Dockerfile
+    ports:
+      - "7004:7004"
+
+  post-trade-review-agent:
+    build:
+      context: .
+      dockerfile: agents/post-trade-review/Dockerfile
+    ports:
+      - "7005:7005"
+
+volumes:
+  postgres_data:
+  redis_data:
