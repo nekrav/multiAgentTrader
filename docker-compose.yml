@@ -1,12 +1,13 @@
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: aitraders
-      POSTGRES_USER: aitraders
-      POSTGRES_PASSWORD: aitraders_dev_password
+      POSTGRES_DB: ${POSTGRES_DB:-aitraders}
+      POSTGRES_USER: ${POSTGRES_USER:-aitraders}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aitraders_dev_password}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
@@ -18,8 +19,9 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -29,17 +31,24 @@ services:
       retries: 5
 
   api:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
       NODE_ENV: production
-      PORT: 4000
-      DATABASE_URL: postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders
-      REDIS_URL: redis://redis:6379
-      AGENT_ENDPOINTS_JSON: "{\"market-data\":\"http://market-data-agent:7001\",\"strategy-research\":\"http://strategy-research-agent:7002\",\"risk\":\"http://risk-agent:7003\",\"execution\":\"http://execution-agent:7004\",\"post-trade-review\":\"http://post-trade-review-agent:7005\"}"
+      PORT: ${PORT:-4000}
+      DATABASE_URL: ${DATABASE_URL:-postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      JWT_SECRET: ${JWT_SECRET:-dev_change_me}
+      SIGNUP_CREDITS: ${SIGNUP_CREDITS:-50}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      RUN_TIMEOUT_MS: ${RUN_TIMEOUT_MS:-120000}
+      RUNS_CONCURRENCY: ${RUNS_CONCURRENCY:-4}
+      AGENT_ENDPOINTS_JSON: '${AGENT_ENDPOINTS_JSON:-{"market-data":"http://market-data-agent:7001","strategy-research":"http://strategy-research-agent:7002","event-analysis":"http://event-analysis-agent:7006","risk":"http://risk-agent:7003","execution":"http://execution-agent:7004","post-trade-review":"http://post-trade-review-agent:7005"}}'
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,60 +58,87 @@ services:
         condition: service_started
       strategy-research-agent:
         condition: service_started
+      event-analysis-agent:
+        condition: service_started
       risk-agent:
         condition: service_started
       execution-agent:
         condition: service_started
       post-trade-review-agent:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
   web:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:4000
-      API_INTERNAL_URL: http://api:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
   market-data-agent:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: agents/market-data/Dockerfile
     ports:
-      - "7001:7001"
+      - "127.0.0.1:7001:7001"
 
   strategy-research-agent:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: agents/strategy-research/Dockerfile
     ports:
-      - "7002:7002"
+      - "127.0.0.1:7002:7002"
+
+  event-analysis-agent:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: agents/event-analysis/Dockerfile
+    ports:
+      - "127.0.0.1:7006:7006"
 
   risk-agent:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: agents/risk/Dockerfile
     ports:
-      - "7003:7003"
+      - "127.0.0.1:7003:7003"
 
   execution-agent:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: agents/execution/Dockerfile
     ports:
-      - "7004:7004"
+      - "127.0.0.1:7004:7004"
 
   post-trade-review-agent:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: agents/post-trade-review/Dockerfile
     ports:
-      - "7005:7005"
+      - "127.0.0.1:7005:7005"
 
 volumes:
   postgres_data:

@@ -74,17 +74,19 @@ export class AgentsService {
   }
 
   private parseEndpoints(raw?: string): Partial<Record<AgentId, string>> {
+    const defaults: Partial<Record<AgentId, string>> = {
+      "market-data": "http://localhost:7001",
+      "strategy-research": "http://localhost:7002",
+      "event-analysis": "http://localhost:7006",
+      risk: "http://localhost:7003",
+    };
     if (!raw) {
-      return {
-        "market-data": "http://localhost:7001",
-        "strategy-research": "http://localhost:7002",
-        risk: "http://localhost:7003",
-      };
+      return defaults;
     }
     try {
-      return JSON.parse(raw) as Partial<Record<AgentId, string>>;
+      return { ...defaults, ...(JSON.parse(raw) as Partial<Record<AgentId, string>>) };
     } catch {
-      return {};
+      return defaults;
     }
   }
 

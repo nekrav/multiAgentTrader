@@ -1,6 +1,7 @@
 export type AgentId =
   | "market-data"
   | "strategy-research"
+  | "event-analysis"
   | "risk"
   | "execution"
   | "post-trade-review";
@@ -23,6 +24,12 @@ export const AGENTS: AgentDescriptor[] = [
     id: "strategy-research",
     name: "Strategy Research Agent",
     description: "Runs Strategy Lab sweeps and proposes parameter changes with out-of-sample checks.",
+    canExecuteOrders: false,
+  },
+  {
+    id: "event-analysis",
+    name: "Event Analysis Agent",
+    description: "Compares current events with historical analogs across forex, stocks, and crypto.",
     canExecuteOrders: false,
   },
   {

@@ -1,4 +1,6 @@
-import { Global, Module } from "@nestjs/common";
+import { Global, Inject, Module, OnModuleInit } from "@nestjs/common";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import Redis from "ioredis";
 import { Pool } from "pg";
 
@@ -31,4 +33,40 @@ export const REDIS_CLIENT = Symbol("REDIS_CLIENT");
   ],
   exports: [POSTGRES_POOL, REDIS_CLIENT],
 })
-export class DatabaseModule {}
+export class DatabaseModule implements OnModuleInit {
+  constructor(@Inject(POSTGRES_POOL) private readonly postgres: Pool) {}
+
+  async onModuleInit() {
+    const migrationsDir = [resolve(process.cwd(), "infra/migrations"), resolve(process.cwd(), "../../infra/migrations")].find((dir) =>
+      existsSync(dir),
+    );
+    if (!migrationsDir) {
+      return;
+    }
+
+    await this.postgres.query(
+      "create table if not exists schema_migrations (filename text primary key, applied_at timestamptz not null default now())",
+    );
+
+    for (const filename of readdirSync(migrationsDir).filter((file) => file.endsWith(".sql")).sort()) {
+      const applied = await this.postgres.query("select 1 from schema_migrations where filename = $1", [filename]);
+      if (applied.rowCount) {
+        continue;
+      }
+
+      const sql = readFileSync(resolve(migrationsDir, filename), "utf8");
+      const client = await this.postgres.connect();
+      try {
+        await client.query("begin");
+        await client.query(sql);
+        await client.query("insert into schema_migrations(filename) values ($1)", [filename]);
+        await client.query("commit");
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      } finally {
+        client.release();
+      }
+    }
+  }
+}

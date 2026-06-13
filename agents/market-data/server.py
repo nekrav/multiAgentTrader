@@ -16,7 +16,7 @@ from aitraders.agents.market_data import build_snapshot
 
 AGENT_ID = "market-data"
 AGENT_NAME = "Market Data Agent"
-AGENT_ROLE = "Fetches and normalizes Coinbase BTC/ETH candles, volatility, trend, and range metrics."
+AGENT_ROLE = "Fetches and normalizes crypto candles plus major forex daily rates, volatility, trend, and range metrics."
 
 
 class MarketDataHandler(BaseHTTPRequestHandler):

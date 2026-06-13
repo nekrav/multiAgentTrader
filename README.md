@@ -4,6 +4,139 @@ Multi-agent trading analytics, research, risk, and review system around determin
 
 AiTraders is separate from `H:\polyBTC`. It can read exported trade/research data and produce analysis, proposals, vetoes, and reviews. Live order placement must remain deterministic and gated outside any LLM approval path.
 
+## Quick Start
+
+### Requirements
+
+Install these before running the project:
+
+- Node.js 20+ and npm 10+
+- Python 3.11+ with `pip`
+- Docker and Docker Compose, recommended for PostgreSQL and Redis
+- PostgreSQL 15+ and Redis 7+ if you choose not to use Docker Compose
+
+The repo uses npm workspaces. Use npm, not pnpm or yarn.
+
+### Install Dependencies
+
+```bash
+npm install
+
+# Optional, only needed for running Python tests locally.
+python3 -m pip install pytest
+```
+
+Python agents use the standard library for their HTTP wrappers and public-data fetches, so there is no required Python package install for normal agent execution.
+
+### Environment
+
+For local development, copy the example environment file:
+
+```bash
+cp .env.example .env.local
+```
+
+Useful defaults:
+
+- Web: `http://localhost:3000`
+- API: `http://localhost:4000`
+- PostgreSQL: `postgres://aitraders:aitraders_dev_password@localhost:5432/aitraders`
+- Redis: `redis://localhost:6379`
+
+The API automatically runs SQL migrations from `infra/migrations` on startup.
+
+### Run Locally With Helper Scripts
+
+The fastest local path is:
+
+```bash
+./scripts/start-services.sh
+```
+
+This starts PostgreSQL/Redis as configured by the project and launches the local agents, API, and web app in tmux.
+
+Stop everything with:
+
+```bash
+./scripts/stop-services.sh
+```
+
+### Run Manually
+
+Start PostgreSQL and Redis first. With Docker Compose:
+
+```bash
+docker compose up -d postgres redis
+```
+
+Then start the Python agents in separate terminals:
+
+```bash
+python3 agents/market-data/server.py
+python3 agents/strategy-research/server.py
+python3 agents/risk/server.py
+PORT=7006 python3 agents/event-analysis/server.py
+PORT=7005 AGENT_ID=post-trade-review AGENT_NAME="Post-Trade Review Agent" AGENT_ROLE="Explains wins and losses, classifies trade outcomes, and records strategy lessons." python3 agents/base_http_agent.py
+```
+
+Start the API and web app:
+
+```bash
+npm run dev --workspace @aitraders/api
+npm run dev --workspace @aitraders/web
+```
+
+Open:
+
+- Web app: `http://localhost:3000`
+- API health: `http://localhost:4000/health`
+
+### Run With Docker Compose
+
+```bash
+docker compose up --build
+```
+
+For an EC2-style deployment with the production compose overlay:
+
+```bash
+cp .env.ec2.example .env
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+See `docs/ec2-deploy.md` for Ubuntu, Docker, reverse proxy, and security group guidance.
+
+### Build And Test
+
+```bash
+npm run build --workspaces
+npm test --workspace apps/api -- --runInBand
+
+# Optional when pytest is installed.
+python3 -m pytest
+```
+
+### Default Login
+
+Database bootstrap creates an admin user:
+
+- Email: `admin@aitraders.local`
+- Password: `admin12345`
+
+New registered users receive signup credits. Admin emails can be configured with `ADMIN_EMAILS`.
+
+### Main Features
+
+- Dashboard and live market intelligence
+- Light/dark theme persisted with the `aitraders-theme` browser cookie
+- Guided Run Analysis console
+- Saved analyses at `/history`
+- Trade setup workspace at `/setups`
+- Agent chain runs: event analysis -> market data -> risk -> strategy research
+- Forex and crypto support for setup and agent workflows
+- Real-history backtesting for strategies using Coinbase crypto candles and Frankfurter forex rates
+- Strategy playbook, reports, alerts, tutorial, FAQ, and admin views
+
 ## Project Context
 
 Related app: `H:\polyBTC`
@@ -48,20 +181,6 @@ The project now also includes a dockerizable full-stack platform:
 - `postgres`: PostgreSQL event/invocation database.
 - `redis`: Redis cache/lock/queue-ready service.
 
-```powershell
-npm install
-npm run build
-npm run test
-```
-
-For local development without Docker, copy `.env.example` to `.env.local` and run the API/web workspaces. Redis/PostgreSQL are only required once code paths write invocation history or use cache/locks.
-
-When Docker is installed:
-
-```powershell
-docker compose up --build
-```
-
 API endpoints:
 
 - `GET http://localhost:4000/health`
@@ -93,7 +212,7 @@ Example request:
 }
 ```
 
-It currently pulls Coinbase Exchange BTC/ETH candles and returns spot price, latest candle, trend, range percentage, realized volatility, baseline volatility, volatility severity, fast-move score, and low/medium/high volatility level.
+It currently pulls Coinbase Exchange BTC/ETH candles and major forex daily rates through Frankfurter. It returns spot price, latest candle, trend, range percentage, realized volatility, baseline volatility, volatility severity, fast-move score, and low/medium/high volatility level.
 
 ### Risk Agent
 
@@ -124,7 +243,21 @@ It supports:
 - `GET /status`
 - `POST /invoke` with task `research`, `strategy_sweep`, or `propose`
 
-It can generate deterministic proposals from Market Data and Risk Agent outputs. When `runBacktest` is true, it can also call Strategy Lab's `/api/backtest` endpoint and summarize the result before proposing or rejecting config changes.
+It can generate deterministic proposals from Market Data and Risk Agent outputs. When `runBacktest` is true, it runs real-history backtests locally by default. If `strategyLabUrl` is explicitly supplied, it can call Strategy Lab's `/api/backtest` endpoint instead.
+
+Built-in real-history backtesting supports:
+
+- Crypto candles from Coinbase Exchange
+- Forex daily rates from Frankfurter
+- `market_favorite_90`
+- `market_favorite_95`
+- `trend_momentum_continuation`
+- `london_session_breakout`
+- `ny_session_reversal`
+- `mean_reversion_exhaustion`
+- `squeeze_breakout_confirmation`
+- `pattern_breakout_with_trend_filter`
+- `reversal_confluence`
 
 Current proposal actions:
 

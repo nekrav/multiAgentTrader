@@ -1,0 +1,695 @@
+Build a web application for **multi-agent market intelligence** focused on **forex, gold, and oil**. The platform should analyze markets using multiple specialized agents, aggregate their outputs, and present explainable analytics, confidence scores, reports, and alerts. The product is not just a signal tool. It should feel like an **institutional-style market intelligence dashboard**.
+
+## Product goal
+
+Create a subscription-based web app where users can:
+
+* view market analysis for forex pairs, gold, and oil
+* see multiple AI/quant agents analyze the same market
+* view consensus, confidence, key levels, and invalidation
+* compare where agents agree and disagree
+* receive alerts and read daily/intraday reports
+* unlock more markets, agents, and features depending on plan
+
+The key differentiator is **cross-market dependency analysis**. Markets should not be analyzed in isolation. Example: USD/CAD should incorporate crude oil and dollar strength. Gold should incorporate dollar strength and real yields. USD/JPY should incorporate yields and risk sentiment.
+
+## MVP market universe
+
+Displayed tradable markets:
+
+* XAU/USD
+* EUR/USD
+* GBP/USD
+* USD/JPY
+* USD/CAD
+* AUD/USD
+* WTI crude oil
+* DXY or a synthetic USD strength index
+
+Context-only drivers for analytics layer:
+
+* US 2Y yield
+* US 10Y yield
+* US real yields
+* risk sentiment proxy
+* VIX / volatility proxy
+* economic calendar / central bank events
+* geopolitical score
+* supply shock score
+
+## Core product concept
+
+The system should have multiple layers:
+
+1. **Independent market agents**
+
+   * each market gets analyzed by specialized agents
+
+2. **Cross-market dependency agent**
+
+   * reads outputs from related markets and drivers
+   * determines whether related markets are confirming or conflicting with the target market
+
+3. **Regime detection**
+
+   * determines if relationships are valid in the current regime
+   * examples: trending, ranging, risk-off, event-driven, panic, carry-friendly
+
+4. **Meta-consensus agent**
+
+   * combines all independent agent outputs plus dependency outputs
+   * returns a final market view
+
+## Agent types
+
+Implement these agents:
+
+### 1. Technical agent
+
+Inputs:
+
+* OHLC candles
+* EMA/SMA
+* RSI
+* MACD
+* ATR
+* support/resistance
+* trend structure
+
+Outputs:
+
+* bias: bullish / bearish / neutral
+* confidence
+* key levels
+* breakout vs reversal context
+* invalidation level
+
+### 2. News / sentiment agent
+
+Inputs:
+
+* news feed
+* economic calendar
+* event importance
+* sentiment score
+
+Outputs:
+
+* macro bias
+* event risk score
+* summary narrative
+* confidence adjustment
+
+### 3. Regime / correlation agent
+
+Inputs:
+
+* rolling correlation
+* volatility
+* cross-market momentum
+* risk sentiment
+* rate/yield relationships
+
+Outputs:
+
+* market regime
+* correlation confirmation/conflict
+* stability score
+
+### 4. Risk agent
+
+Inputs:
+
+* volatility
+* event proximity
+* disagreement among agents
+* liquidity/spread assumptions
+
+Outputs:
+
+* safe / caution / high-risk
+* avoid-trade flag
+* risk notes
+
+### 5. Cross-market dependency agent
+
+Inputs:
+
+* outputs from target market agents
+* outputs from related market agents
+* dependency matrix
+* regime state
+
+Outputs:
+
+* confirmation score
+* conflict score
+* dependency adjustment
+* final dependency summary
+
+### 6. Meta-consensus agent
+
+Inputs:
+
+* technical agent output
+* sentiment agent output
+* regime agent output
+* risk agent output
+* dependency agent output
+
+Outputs:
+
+* final bias
+* final confidence
+* agreement score
+* summary
+* bullish case
+* bearish case
+* invalidation
+* what changed
+
+## Most important architectural rule
+
+Do **not** rely purely on LLM opinion. Use deterministic analytics first and LLMs second.
+
+* deterministic/statistical logic should produce the real scores and signals
+* LLMs should mostly be used for explanation, summaries, report writing, and Q&A
+* every agent should return structured JSON
+* every output should be stored for history, evaluation, and backtesting
+
+## Cross-market dependency matrix
+
+Implement this initial static dependency matrix. This is phase 1 and should be config-driven.
+
+### DXY / USD strength
+
+Dependencies:
+
+* US 2Y yield — direct — weight 0.9
+* US real yields — direct — weight 0.95
+* risk sentiment — regime-dependent — weight 0.7
+* gold — inverse — weight 0.65
+* oil — regime-dependent — weight 0.45
+
+### EUR/USD
+
+Dependencies:
+
+* DXY — inverse — weight 0.95
+* US yields — inverse — weight 0.8
+* ECB/Fed spread proxy — direct — weight 0.95
+* risk sentiment — regime-dependent — weight 0.5
+
+### GBP/USD
+
+Dependencies:
+
+* DXY — inverse — weight 0.9
+* US yields — inverse — weight 0.7
+* BoE/Fed spread proxy — direct — weight 0.85
+* EUR/USD — direct — weight 0.6
+
+### USD/JPY
+
+Dependencies:
+
+* US 10Y yield — direct — weight 0.95
+* US/JP yield spread — direct — weight 1.0
+* risk sentiment — regime-dependent — weight 0.9
+* DXY — direct — weight 0.7
+
+### USD/CAD
+
+Dependencies:
+
+* WTI crude oil — inverse — weight 0.95
+* DXY — direct — weight 0.85
+* US/Canada rate spread — direct — weight 0.75
+
+### AUD/USD
+
+Dependencies:
+
+* DXY — inverse — weight 0.9
+* risk sentiment — direct — weight 0.85
+* commodity basket — direct — weight 0.8
+* China proxy — direct — weight 0.7
+
+### XAU/USD
+
+Dependencies:
+
+* US real yields — inverse — weight 1.0
+* DXY — inverse — weight 0.95
+* risk / geopolitical stress — regime-dependent — weight 0.7
+* inflation expectations — direct — weight 0.55
+* oil — direct — weight 0.35
+
+### WTI crude oil
+
+Dependencies:
+
+* DXY — inverse — weight 0.75
+* growth / risk sentiment — direct — weight 0.8
+* supply shock score — event-sensitive — weight 1.0
+* geopolitical score — event-sensitive — weight 0.85
+
+## Cross-market scoring behavior
+
+For each dependency, classify it as:
+
+* strongly_confirming
+* confirming
+* neutral
+* conflicting
+* strongly_conflicting
+
+Example:
+If USD/CAD base bias is bullish:
+
+* DXY bullish = confirming
+* WTI bearish = confirming
+* rate spread bullish USD = confirming
+
+Then the dependency agent should boost confidence.
+
+If gold base bias is bullish:
+
+* DXY bullish = conflicting
+* real yields rising = strongly conflicting
+* geopolitical stress high = confirming
+
+Then confidence should be reduced or mixed.
+
+## Suggested output contract for each agent
+
+Use structured JSON like this:
+
+```json
+{
+  "market": "XAUUSD",
+  "timeframe": "1H",
+  "timestamp": "2026-06-11T12:00:00Z",
+  "bias": "bullish",
+  "confidence": 0.74,
+  "score": 7.1,
+  "summary": "Momentum remains positive above short-term support.",
+  "key_levels": {
+    "support": [3018.5, 3009.2],
+    "resistance": [3034.8, 3042.1]
+  },
+  "risk_flags": ["major_us_event_today"],
+  "invalidation": "1H close below 3009.2",
+  "features": {
+    "rsi": 62.1,
+    "atr": 11.4,
+    "ema_trend": "up"
+  }
+}
+```
+
+For cross-market outputs:
+
+```json
+{
+  "target_market": "USDCAD",
+  "timeframe": "1H",
+  "base_bias": "bullish",
+  "base_confidence": 0.69,
+  "related_markets": [
+    {
+      "market": "USOIL",
+      "relationship": "inverse",
+      "current_effect": "confirming",
+      "strength": 0.74
+    },
+    {
+      "market": "DXY",
+      "relationship": "direct",
+      "current_effect": "strongly_confirming",
+      "strength": 0.81
+    }
+  ],
+  "adjustment": 0.08,
+  "final_confidence": 0.77,
+  "summary": "Oil weakness and dollar strength both support the bullish USDCAD view in the current regime."
+}
+```
+
+## Product UX requirements
+
+The app should look like a premium analytics platform, not a gimmicky AI toy.
+
+### Main pages
+
+#### 1. Public landing page
+
+Sections:
+
+* hero
+* supported markets
+* how the agents work
+* pricing
+* screenshots
+* FAQ
+* disclaimer
+
+#### 2. Dashboard
+
+Show:
+
+* watchlist
+* current bias cards by market
+* strongest bullish setups
+* strongest bearish setups
+* markets in conflict
+* today’s key events
+* latest alerts
+* report summaries
+
+#### 3. Market detail page
+
+Show:
+
+* chart
+* consensus card
+* each agent card
+* support/resistance
+* scenario map
+* confidence history
+* what changed
+* invalidation
+* dependency card showing confirming/conflicting markets
+
+#### 4. Reports page
+
+Show:
+
+* daily reports
+* intraday reports
+* history by symbol/timeframe
+
+#### 5. Alerts page
+
+Show:
+
+* alert rules
+* alert history
+* consensus change alerts
+* level break alerts
+* event/risk alerts
+
+#### 6. Account and billing page
+
+Show:
+
+* current plan
+* active agents
+* trial countdown
+* upgrade/downgrade
+
+#### 7. Admin panel
+
+Show:
+
+* users
+* subscriptions
+* feature access
+* ingestion health
+* agent health
+* recent runs
+
+## Pricing / business logic
+
+Pricing should vary primarily by:
+
+* number of agents
+* number of markets
+* refresh speed
+* access to alerts/backtesting/API
+
+Suggested tiers:
+
+### Free Trial
+
+* 7 days
+* 2 agents
+* 2 markets
+* delayed data
+* limited alerts
+
+### Starter
+
+* 3 agents
+* 3 markets
+* daily reports
+* limited intraday access
+
+### Pro
+
+* 5 agents
+* all core markets
+* intraday dashboard
+* advanced alerts
+* report history
+* dependency analysis
+
+### Elite
+
+* all agents
+* all markets
+* faster refresh
+* backtesting
+* exports
+* API/webhooks
+* full cross-market intelligence
+
+## Tech stack
+
+Use this stack unless implementation constraints suggest something close:
+
+### Frontend
+
+* Next.js
+* TypeScript
+* Tailwind or equivalent clean UI system
+* charting library
+
+### Backend
+
+* NestJS
+* TypeScript
+* REST API
+* BullMQ for jobs
+* Redis
+
+### Analytics / agent workers
+
+* Python
+* pandas
+* numpy
+* scipy
+* statsmodels
+* scikit-learn
+
+### Data
+
+* PostgreSQL
+* TimescaleDB extension for time-series
+* Redis for cache and queues
+* S3-compatible object storage for report snapshots/exports
+
+### Billing / auth
+
+* Stripe
+* standard auth provider or custom auth
+
+## Data model requirements
+
+Implement core entities for:
+
+* users
+* plans
+* subscriptions
+* markets
+* candles
+* news items
+* economic events
+* agents
+* agent runs
+* agent outputs
+* consensus outputs
+* alert rules
+* alert events
+* reports
+* market dependencies
+* cross-market outputs
+
+Important additions:
+
+### MarketDependency
+
+Fields:
+
+* sourceMarketId
+* targetMarketId
+* dependencyType
+* weight
+* tier
+* stabilityScore
+* currentRegime
+* updatedAt
+
+### CrossMarketOutput
+
+Fields:
+
+* targetMarketId
+* timeframe
+* timestamp
+* relatedMarkets JSON
+* confirmationScore
+* conflictScore
+* finalAdjustment
+* summary
+* rawOutput JSON
+
+## API requirements
+
+Implement routes for:
+
+### Public
+
+* GET /markets
+* GET /plans
+* POST /auth/register
+* POST /auth/login
+* POST /billing/create-checkout-session
+
+### App
+
+* GET /dashboard
+* GET /markets/:symbol
+* GET /markets/:symbol/candles
+* GET /markets/:symbol/agents
+* GET /markets/:symbol/consensus
+* GET /reports
+* GET /reports/:id
+* GET /alerts
+* POST /alerts
+* PATCH /alerts/:id
+* DELETE /alerts/:id
+* GET /account/subscription
+
+### Admin
+
+* GET /admin/users
+* GET /admin/subscriptions
+* GET /admin/agents
+* GET /admin/ingestion-health
+* GET /admin/agent-runs
+* PATCH /admin/agents/:id
+
+## Development phases
+
+### Phase 1
+
+* project skeleton
+* auth
+* billing
+* landing page
+* dashboard shell
+* admin shell
+
+### Phase 2
+
+* market data ingestion
+* candle storage
+* chart rendering
+* market APIs
+
+### Phase 3
+
+* technical agent
+* sentiment agent
+* risk agent
+* meta-consensus agent
+* output storage
+
+### Phase 4
+
+* dependency matrix config
+* cross-market dependency agent
+* dependency UI
+* confirmation/conflict scoring
+
+### Phase 5
+
+* reports
+* alerts
+* email delivery
+* usage limits by plan
+
+### Phase 6
+
+* evaluation and backtesting
+* confidence calibration
+* disagreement views
+* observability
+* admin refinements
+
+## Key implementation rules
+
+* build the system so every agent output is auditable
+* store all predictions and confidence values historically
+* make dependency logic config-driven
+* make agent outputs structured first, natural language second
+* separate market-specific logic from shared orchestration logic
+* do not hardcode simplistic permanent assumptions like "oil down always means USD up"
+* support regime-aware relationships
+* surface disagreements instead of hiding them
+* prioritize explainability in the UI
+
+## MVP priority bundles
+
+Implement these first because they give the strongest cross-market feel:
+
+1. USD/CAD ← oil, DXY, rates
+2. XAU/USD ← DXY, real yields, risk
+3. USD/JPY ← yields, spread, risk
+4. EUR/USD ← DXY, yields, rate expectations
+5. WTI ← DXY, growth/risk, supply/geopolitical events
+
+## Deliverables to generate
+
+Please implement or scaffold:
+
+1. monorepo or clean repo structure
+2. Next.js frontend
+3. NestJS backend
+4. Python analytics worker service
+5. database schema
+6. dependency matrix config
+7. base agent framework
+8. dashboard page
+9. market detail page
+10. admin page
+11. alert/report scaffolding
+12. sample seeded data and sample outputs
+
+## Final product framing
+
+The product should be positioned internally and in the UI as:
+
+**Multi-agent market intelligence for forex, gold, and oil, powered by explainable analytics and cross-market dependency analysis.**
+
+It should feel like:
+
+* specialized agents
+* confidence-based analytics
+* cross-market confirmation/conflict
+* scenario intelligence
+* professional dashboards
+* subscription monetization
+
+Do not position it as guaranteed trading signals. Build it as a serious analytics platform.

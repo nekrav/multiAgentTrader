@@ -10,6 +10,8 @@
     "dev": "npm run dev:api",
     "dev:api": "npm run dev --workspace @aitraders/api",
     "dev:web": "npm run dev --workspace @aitraders/web",
+    "services:start": "./scripts/start-services.sh",
+    "services:stop": "./scripts/stop-services.sh",
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces"

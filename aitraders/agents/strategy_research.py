@@ -4,6 +4,8 @@ import json
 import urllib.request
 from typing import Any
 
+from aitraders.agents.backtesting import run_real_history_backtest
+
 
 DEFAULT_STRATEGY_LAB_URL = "http://localhost:5010"
 
@@ -21,15 +23,20 @@ def research_strategy(payload: dict[str, Any]) -> dict[str, Any]:
         "summary": summarize(proposals, backtest),
         "proposals": proposals,
         "backtest": summarize_backtest(backtest) if backtest else None,
+        "backtestDetails": backtest if backtest and backtest.get("mode") == "real_history" else None,
         "inputs": {
             "hasMarketSnapshot": bool(market_snapshot),
             "hasRiskCheck": bool(risk_check),
             "hasBacktest": bool(backtest),
+            "evaluatedStrategies": normalize_strategies(market_snapshot=market_snapshot, risk_check=risk_check, backtest=backtest),
         },
     }
 
 
 def call_strategy_lab(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload.get("strategyLabUrl"):
+        return run_real_history_backtest(payload)
+
     strategy_lab_url = str(payload.get("strategyLabUrl") or DEFAULT_STRATEGY_LAB_URL).rstrip("/")
     request_payload = {
         "assets": payload.get("assets") or ["BTC", "ETH"],
@@ -60,6 +67,7 @@ def build_proposals(
     backtest: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     proposals: list[dict[str, Any]] = []
+    requested_strategies = normalize_strategies(market_snapshot=market_snapshot, risk_check=risk_check, backtest=backtest)
     risk_level = str(risk_check.get("riskLevel", "unknown")).lower()
     risk_passed = risk_check.get("passed")
     volatility = market_snapshot.get("volatility", {}) if market_snapshot else {}
@@ -72,7 +80,7 @@ def build_proposals(
                 "id": "no_live_promotion_high_risk",
                 "action": "do_not_trade",
                 "confidence": 0.9,
-                "parameters": {"reason": "high_risk_or_high_volatility"},
+                "parameters": {"reason": "high_risk_or_high_volatility", "strategies": requested_strategies},
                 "rationale": "Risk/volatility conditions are not suitable for promoting a live strategy.",
             }
         )
@@ -90,7 +98,7 @@ def build_proposals(
                 "action": "propose_config",
                 "confidence": 0.78,
                 "parameters": {
-                    "strategies": ["market_favorite_90", "market_favorite_95"],
+                    "strategies": requested_strategies,
                     "minEdgePct": 0.3,
                     "entryWindowSecondsLeft": [20, 90],
                     "maxVolatilitySeverity": 2.0,
@@ -116,9 +124,9 @@ def build_proposals(
                 "action": "test_in_strategy_lab",
                 "confidence": 0.68,
                 "parameters": {
-                    "strategies": ["market_favorite_90", "market_favorite_95"],
+                    "strategies": requested_strategies,
                     "payoutMode": "binary_polymarket",
-                    "assets": ["BTC", "ETH"],
+                    "assets": preferred_assets(market_snapshot),
                     "days": 2,
                     "maxVolatilitySeverity": 1.75,
                 },
@@ -180,6 +188,32 @@ def extract_nested(value: Any) -> dict[str, Any]:
     while isinstance(current.get("result"), dict):
         current = current["result"]
     return current
+
+
+def normalize_strategies(*, market_snapshot: dict[str, Any], risk_check: dict[str, Any], backtest: dict[str, Any] | None) -> list[str]:
+    strategy_sources = [
+        market_snapshot.get("strategies") if isinstance(market_snapshot, dict) else None,
+        risk_check.get("strategies") if isinstance(risk_check, dict) else None,
+        backtest.get("strategies") if isinstance(backtest, dict) else None,
+    ]
+    for value in strategy_sources:
+        if isinstance(value, list) and value:
+            return [str(item) for item in value[:8]]
+    asset = str(market_snapshot.get("asset") or "").upper()
+    if "/" in asset or any(code in asset for code in ["EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"]):
+        return ["trend_momentum_continuation", "london_session_breakout", "mean_reversion_exhaustion"]
+    return ["market_favorite_90", "market_favorite_95"]
+
+
+def preferred_assets(market_snapshot: dict[str, Any]) -> list[str]:
+    asset = str(market_snapshot.get("asset") or "").upper()
+    if "/" in asset:
+        return [asset]
+    if asset in {"BTC", "BTC-USD"}:
+        return ["BTC"]
+    if asset in {"ETH", "ETH-USD"}:
+        return ["ETH"]
+    return ["BTC", "ETH"]
 
 
 def first_number(data: dict[str, Any], keys: list[str]) -> float | None:
