@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 128 128" role="img" aria-label="AiTraders logo mark">
+  <path d="M12 20C12 13.373 17.373 8 24 8h80c6.627 0 12 5.373 12 12v88c0 6.627-5.373 12-12 12H24c-6.627 0-12-5.373-12-12V20z" fill="#0F172A"/>
+  <path d="M30 86L52 42L74 60L96 32L102 80" stroke="#3B82F6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="30" cy="86" r="6" fill="#22D3EE"/>
+  <circle cx="52" cy="42" r="5" fill="#22D3EE"/>
+  <circle cx="74" cy="60" r="5" fill="#22D3EE"/>
+  <circle cx="96" cy="32" r="5" fill="#22D3EE"/>
+  <circle cx="102" cy="80" r="6" fill="#22D3EE"/>
+</svg>

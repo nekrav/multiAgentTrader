@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
-RUN npm install --workspace @aitraders/web --workspace @aitraders/shared --include-workspace-root
+RUN npm install --include=dev --workspace @aitraders/web --workspace @aitraders/shared --include-workspace-root
 
 FROM node:22-alpine AS build
 WORKDIR /app

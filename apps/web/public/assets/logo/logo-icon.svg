@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128" role="img" aria-label="AiTraders app icon">
+  <defs>
+    <rect id="bg" x="6" y="6" width="116" height="116" rx="22" ry="22"/>
+  </defs>
+  <use href="#bg" fill="#0F172A"/>
+  <path d="M30 86L52 42L74 60L96 32L102 80" stroke="#3B82F6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="30" cy="86" r="6" fill="#22D3EE"/>
+  <circle cx="52" cy="42" r="5" fill="#22D3EE"/>
+  <circle cx="74" cy="60" r="5" fill="#22D3EE"/>
+  <circle cx="96" cy="32" r="5" fill="#22D3EE"/>
+  <circle cx="102" cy="80" r="6" fill="#22D3EE"/>
+</svg>

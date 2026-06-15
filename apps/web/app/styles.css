@@ -1362,7 +1362,22 @@ h1 {
   min-width: 0;
 }
 
-.navBrand span,
+.navLogo {
+  display: block;
+  height: 28px;
+  width: 28px;
+}
+
+.navBrand strong,
+.accountText strong {
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.navBrand strong {
+  margin: 0;
+}
+
 .avatarCircle,
 .themeToggle span {
   align-items: center;
@@ -1374,17 +1389,6 @@ h1 {
   height: 34px;
   justify-content: center;
   width: 34px;
-}
-
-.navBrand span {
-  background: var(--green);
-  color: var(--on-accent);
-}
-
-.navBrand strong,
-.accountText strong {
-  letter-spacing: 0;
-  white-space: nowrap;
 }
 
 .navLinks {
@@ -2493,9 +2497,8 @@ h3 {
   border-color: var(--line);
 }
 
-.navBrand span {
-  background: var(--cyan);
-  color: var(--on-accent);
+.navLogo {
+  filter: none;
 }
 
 .navLinks a,

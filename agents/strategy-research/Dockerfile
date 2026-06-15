@@ -1,7 +1,7 @@
 FROM python:3.12-slim
-WORKDIR /agent
+WORKDIR /app
 COPY aitraders ./aitraders
-COPY agents/strategy-research/server.py ./server.py
+COPY agents/strategy-research/server.py ./agents/strategy-research/server.py
 ENV PORT=7002
 EXPOSE 7002
-CMD ["python", "server.py"]
+CMD ["python", "agents/strategy-research/server.py"]

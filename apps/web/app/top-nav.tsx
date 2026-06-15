@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { clearToken, getToken, apiFetch } from "./lib/api";
 
@@ -116,7 +117,13 @@ export function TopNav() {
       </a>
       <nav className="topNav" aria-label="Product sections">
         <a className="navBrand" href="/" translate="no">
-          <span>AT</span>
+          <Image
+            className="navLogo"
+            src="/assets/logo/logo-mark.svg"
+            alt="AiTraders logo"
+            width={28}
+            height={28}
+          />
           <strong>AiTraders</strong>
         </a>
         <div className="navLinks">

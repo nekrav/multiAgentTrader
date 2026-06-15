@@ -1,3 +1,4 @@
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { Injectable, NotFoundException, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import {
   alerts,
@@ -13,8 +14,25 @@ import {
   reports,
 } from "./intelligence.data";
 
+type ExternalNewsEvent = {
+  id: string;
+  time: string;
+  title: string;
+  importance: "high" | "medium" | "low";
+  affected: string[];
+};
+
+type ExternalNewsAlert = {
+  id: string;
+  market: string;
+  severity: "warning" | "info" | string;
+  message: string;
+  createdAt?: string;
+};
+
 @Injectable()
 export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
+  private readonly newsFeedPath = process.env.NEWS_FEED_PATH ?? "/data/news/latest-news.json";
   private readonly refreshIntervalMs = Number(process.env.ANALYSIS_REFRESH_MS ?? 60_000);
   private refreshTimer?: NodeJS.Timeout;
   private runSequence = 0;
@@ -92,9 +110,7 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
         .sort((a, b) => b.consensus.finalConfidence - a.consensus.finalConfidence)
         .slice(0, 3),
       conflicts: enriched.filter((market) => market.dependency.conflictScore >= 0.2),
-      events,
-      alerts,
-      reports,
+      ...this.getNewsBundle(),
       plans,
     };
   }
@@ -229,7 +245,7 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
     const lagSeconds = Math.max(0, Math.round((Date.now() - Date.parse(snapshot.updatedAt)) / 1000));
     return {
       candles: { status: "minute-refresh", lagSeconds },
-      news: { status: "scaffolded", lagSeconds: null },
+      news: this.getNewsIngestionStatus(),
       calendar: { status: "minute-refresh", lagSeconds },
       dependencies: { status: "config-driven", count: dependencies.length },
       analysis: {
@@ -240,6 +256,117 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
         cadenceSeconds: Math.round(this.refreshIntervalMs / 1000),
       },
     };
+  }
+
+  private getNewsBundle() {
+    const news = this.loadExternalNews();
+    return {
+      events: [...events, ...news.events],
+      alerts: [...alerts, ...news.alerts],
+      reports,
+    };
+  }
+
+  private getNewsIngestionStatus() {
+    const feedLastUpdated = this.getNewsFeedUpdatedAt();
+    if (feedLastUpdated === null) {
+      return {
+        status: "static",
+        lagSeconds: null,
+        source: "none",
+      };
+    }
+
+    return {
+      status: "script-updated",
+      source: this.newsFeedPath,
+      lagSeconds: Math.max(0, Math.round((Date.now() - feedLastUpdated) / 1000)),
+      updatedAt: new Date(feedLastUpdated).toISOString(),
+    };
+  }
+
+  private getNewsFeedUpdatedAt() {
+    if (!existsSync(this.newsFeedPath)) {
+      return null;
+    }
+    try {
+      return Number(statSync(this.newsFeedPath).mtimeMs);
+    } catch {
+      return null;
+    }
+  }
+
+  private loadExternalNews() {
+    if (!existsSync(this.newsFeedPath)) {
+      return { events: [], alerts: [] };
+    }
+
+    try {
+      const raw = readFileSync(this.newsFeedPath, "utf-8").trim();
+      if (!raw) {
+        return { events: [], alerts: [] };
+      }
+      const payload = JSON.parse(raw) as {
+        events?: Array<Partial<ExternalNewsEvent>>;
+        alerts?: Array<Partial<ExternalNewsAlert>>;
+      };
+
+      const eventsFromFeed = this.normalizeNewsEvents(payload.events ?? []);
+      const alertsFromFeed = this.normalizeNewsAlerts(payload.alerts ?? []);
+
+      return {
+        events: eventsFromFeed,
+        alerts: alertsFromFeed,
+      };
+    } catch {
+      return { events: [], alerts: [] };
+    }
+  }
+
+  private normalizeNewsEvents(items: Array<Partial<ExternalNewsEvent>>): ExternalNewsEvent[] {
+    return items
+      .slice(0, 12)
+      .map((item, index) => ({
+        id: `news-${String(item.id ?? `item-${index}`).slice(0, 64)}`,
+        time: this.normalizeNewsTime(item.time),
+        title: String(item.title ?? "Untitled news update").slice(0, 130),
+        importance: this.normalizeNewsImportance(item.importance),
+        affected: this.normalizeStringArray(item.affected).slice(0, 8),
+      }))
+      .filter((item) => item.affected.length > 0);
+  }
+
+  private normalizeNewsAlerts(items: Array<Partial<ExternalNewsAlert>>): ExternalNewsAlert[] {
+    return items
+      .slice(0, 8)
+      .map((item, index) => ({
+        id: `news-alert-${String(item.id ?? `item-${index}`).slice(0, 60)}`,
+        market: String(item.market ?? "DXY"),
+        severity: String(item.severity ?? "info"),
+        message: String(item.message ?? "News-derived signal processed.").slice(0, 190),
+        createdAt: this.normalizeNewsTime(item.createdAt),
+      }));
+  }
+
+  private normalizeNewsImportance(value: unknown): "high" | "medium" | "low" {
+    if (value === "high" || value === "medium" || value === "low") {
+      return value;
+    }
+    return "medium";
+  }
+
+  private normalizeStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
+  }
+
+  private normalizeNewsTime(value: unknown): string {
+    if (typeof value === "string" && value.trim()) {
+      return value;
+    }
+    return new Date().toISOString();
   }
 
   getAgentRuns() {

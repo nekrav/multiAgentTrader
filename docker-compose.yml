@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-aitraders}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aitraders_dev_password}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
@@ -21,7 +21,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "127.0.0.1:6379:6379"
+      - "127.0.0.1:${REDIS_HOST_PORT:-16379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -47,6 +47,7 @@ services:
       RUN_TIMEOUT_MS: ${RUN_TIMEOUT_MS:-120000}
       RUNS_CONCURRENCY: ${RUNS_CONCURRENCY:-4}
       AGENT_ENDPOINTS_JSON: '${AGENT_ENDPOINTS_JSON:-{"market-data":"http://market-data-agent:7001","strategy-research":"http://strategy-research-agent:7002","event-analysis":"http://event-analysis-agent:7006","risk":"http://risk-agent:7003","execution":"http://execution-agent:7004","post-trade-review":"http://post-trade-review-agent:7005"}}'
+      NEWS_FEED_PATH: ${NEWS_FEED_PATH:-/data/news/latest-news.json}
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:
@@ -66,6 +67,10 @@ services:
         condition: service_started
       post-trade-review-agent:
         condition: service_started
+      news-feed-updater:
+        condition: service_started
+    volumes:
+      - news_feed_data:/data/news
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health >/dev/null 2>&1 || exit 1"]
       interval: 15s
@@ -87,7 +92,7 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://$$(hostname):3000 >/dev/null 2>&1 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -99,6 +104,17 @@ services:
       dockerfile: agents/market-data/Dockerfile
     ports:
       - "127.0.0.1:7001:7001"
+
+  news-feed-updater:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: scripts/news-feed-updater/Dockerfile
+    environment:
+      UPDATE_INTERVAL_SECONDS: ${NEWS_UPDATE_INTERVAL_SECONDS:-60}
+      MAX_EVENTS: ${NEWS_MAX_EVENTS:-14}
+    volumes:
+      - news_feed_data:/data/news
 
   strategy-research-agent:
     restart: unless-stopped
@@ -143,3 +159,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  news_feed_data:

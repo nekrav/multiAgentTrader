@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="72" viewBox="0 0 320 72" role="img" aria-label="AiTraders full logo">
+  <g transform="translate(8,8)">
+    <path d="M12 12C12 5.373 17.373 0 24 0h32c6.627 0 12 5.373 12 12v48c0 6.627-5.373 12-12 12H24c-6.627 0-12-5.373-12-12V12z" fill="#0F172A"/>
+    <path d="M30 50L52 6L74 24L96 0L102 48" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="30" cy="50" r="5" fill="#22D3EE"/>
+    <circle cx="52" cy="6" r="4" fill="#22D3EE"/>
+    <circle cx="74" cy="24" r="4" fill="#22D3EE"/>
+    <circle cx="96" cy="0" r="4" fill="#22D3EE"/>
+    <circle cx="102" cy="48" r="5" fill="#22D3EE"/>
+  </g>
+  <text x="116" y="46" font-family="Inter, -apple-system, Segoe UI, Roboto, sans-serif" font-size="30" font-weight="700" fill="#0F172A" letter-spacing="0.4">AI Traders</text>
+</svg>

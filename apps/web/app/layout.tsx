@@ -5,6 +5,11 @@ import "./styles.css";
 export const metadata: Metadata = {
   title: "AiTraders",
   description: "Multi-agent trading analytics dashboard",
+  icons: {
+    icon: "/assets/logo/favicon.svg",
+    shortcut: "/assets/logo/favicon.svg",
+    apple: "/assets/logo/logo-icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
