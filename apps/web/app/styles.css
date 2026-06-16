@@ -2448,15 +2448,15 @@ h1 {
   background-size: 100% 25%, 12.5% 100%, 100% 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
-  min-height: 280px;
+  height: 190px;
   overflow: hidden;
   position: relative;
 }
 
 .terminalHeroChart,
 .terminalChartEmpty {
-  height: 100%;
-  min-height: 280px;
+  display: block;
+  height: 190px;
   width: 100%;
 }
 
@@ -2953,11 +2953,17 @@ h3 {
   background: var(--bg);
   border-color: var(--line);
   border-top: 1px solid var(--line);
-  padding: 16px;
+  gap: 8px;
+  padding: 12px;
 }
 
 .terminalChartPanel.move-sell {
   border-top-color: var(--line);
+}
+
+.terminalChartPanel .tradePanelTop h1 {
+  font-size: clamp(20px, 2.6vw, 36px);
+  line-height: 1.05;
 }
 
 .terminalPanelTitle {
@@ -3046,12 +3052,12 @@ h3 {
   background: var(--bg);
   background-size: 100% 20%, 10% 100%, 100% 100%, 100% 100%;
   border-color: var(--line);
-  min-height: 350px;
+  height: 190px;
 }
 
 .terminalHeroChart,
 .terminalChartEmpty {
-  min-height: 350px;
+  height: 190px;
 }
 
 .terminalHeroChart polyline,
@@ -3069,35 +3075,32 @@ h3 {
 }
 
 .signalRail {
-  bottom: 12px;
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(86px, 1fr));
-  left: 12px;
-  position: absolute;
-  right: 12px;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .signalPill {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   display: grid;
-  gap: 3px;
-  padding: 10px;
+  gap: 2px;
+  padding: 6px 9px;
 }
 
 .signalPill span {
   color: var(--muted);
   font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .signalPill strong {
   color: var(--text);
-  font-size: 18px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
 .signalPill.dangerSignal {
@@ -5083,4 +5086,130 @@ h3 {
     border-bottom: 1px solid var(--line);
     border-right: 0;
   }
+}
+
+/* Terminal chart panel pair navigation */
+.chartPanelTopRight {
+  align-items: end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chartPairNav {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.chartPairNavBtn {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 18px;
+  font-weight: 700;
+  height: 30px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: border-color 160ms ease, color 160ms ease;
+  width: 30px;
+}
+
+.chartPairNavBtn:hover:not(:disabled) {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.chartPairNavBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.chartPairNavCount {
+  color: var(--muted);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  min-width: 32px;
+  text-align: center;
+}
+
+.chartPairDots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.chartPairDot {
+  background: var(--line);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  height: 6px;
+  padding: 0;
+  transition: background 160ms ease, width 160ms ease;
+  width: 6px;
+}
+
+.chartPairDotActive {
+  background: var(--cyan);
+  width: 18px;
+}
+
+/* Chart info icon + tooltip */
+.chartInfoWrap {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 4;
+}
+
+.chartInfoBtn {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  height: 24px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: border-color 160ms ease, color 160ms ease;
+  width: 24px;
+}
+
+.chartInfoBtn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.chartInfoTooltip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px var(--shadow);
+  color: var(--muted);
+  display: none;
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 240px;
+  padding: 10px 12px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: max-content;
+}
+
+.chartInfoWrap:hover .chartInfoTooltip,
+.chartInfoWrap:focus-within .chartInfoTooltip {
+  display: block;
 }

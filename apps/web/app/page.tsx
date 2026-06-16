@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { BrowserClock } from "./browser-clock";
 import { LiveHomeDashboard } from "./live-home-dashboard";
+import { TerminalChartPanel } from "./terminal-chart-panel-client";
 import { TopNav } from "./top-nav";
 
 type Bias = "bullish" | "bearish" | "neutral";
@@ -217,6 +218,9 @@ export default async function Home() {
         primary={primaryRecommendation}
         primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
         secondary={secondaryRecommendations}
+        secondaryCandles={Object.fromEntries(
+          secondaryRecommendations.map((rec) => [rec.symbol, initialCandlesBySymbol[rec.symbol] ?? []])
+        )}
         watchlist={dashboard.watchlist}
         alerts={dashboard.alerts.slice(0, 2)}
         events={dashboard.events.slice(0, 2)}
@@ -571,6 +575,7 @@ function TraderDecisionPanel({
   primary,
   primaryCandles,
   secondary,
+  secondaryCandles,
   watchlist,
   alerts,
   events,
@@ -582,6 +587,7 @@ function TraderDecisionPanel({
   primary?: TradeRecommendation;
   primaryCandles: Candle[];
   secondary: TradeRecommendation[];
+  secondaryCandles: Record<string, Candle[]>;
   watchlist: DashboardMarket[];
   alerts: Dashboard["alerts"];
   events: Dashboard["events"];
@@ -590,6 +596,11 @@ function TraderDecisionPanel({
   conflictCount: number;
   highRiskCount: number;
 }) {
+  const chartEntries = [
+    ...(primary ? [{ recommendation: primary, candles: primaryCandles }] : []),
+    ...secondary.map((rec) => ({ recommendation: rec, candles: secondaryCandles[rec.symbol] ?? [] })),
+  ];
+
   return (
     <section className="terminalHero">
       <aside className="terminalRail">
@@ -612,52 +623,7 @@ function TraderDecisionPanel({
         </div>
       </aside>
 
-      <div className={`terminalChartPanel ${primary ? `move-${primary.move.toLowerCase()}` : ""}`}>
-        <div className="tradePanelTop">
-          <div>
-            <p className="eyebrow">Agent Trade Desk</p>
-            <h1>{primary ? `${primary.move} ${primary.label}` : "No actionable recommendation"}</h1>
-          </div>
-          {primary ? (
-            <div className="decisionStack">
-              <span className={`moveBadge move-${primary.move.toLowerCase()}`}>{primary.move}</span>
-              <small>{formatPercent(primary.consensus.finalConfidence)} confidence</small>
-            </div>
-          ) : null}
-        </div>
-
-        {primary ? (
-          <>
-            <div className="terminalChartFrame">
-              <TradeHeroChart candles={primaryCandles} positive={primary.changePct >= 0} />
-              <div className="chartOverlay">
-                <span>{primary.label}</span>
-                <strong>{formatPrice(primary.price)}</strong>
-                <small className={primary.changePct >= 0 ? "positive" : "negative"}>{formatSignedPercent(primary.changePct)}</small>
-              </div>
-              <div className="signalRail" aria-label="Agent recommendation quality">
-                <SignalPill label="Score" value={formatPercent(primary.recommendationScore)} />
-                <SignalPill label="Agree" value={formatPercent(primary.consensus.agreementScore)} />
-                <SignalPill label="Confirm" value={formatPercent(primary.dependency.confirmationScore)} />
-                <SignalPill label="Conflict" value={formatPercent(primary.dependency.conflictScore)} danger />
-              </div>
-            </div>
-            <p className="tradeSummary">{primary.summary}</p>
-            <div className="tradeRationale">
-              <div>
-                <span>Agent Rationale</span>
-                <strong>{primary.dependency.summary}</strong>
-              </div>
-              <div>
-                <span>Invalidation</span>
-                <strong>{primary.consensus.invalidation}</strong>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p className="tradeSummary">No market currently clears the directional confidence filter.</p>
-        )}
-      </div>
+      <TerminalChartPanel entries={chartEntries} />
 
       <aside className="terminalIntelPanel">
         <div className="terminalPanelTitle">
