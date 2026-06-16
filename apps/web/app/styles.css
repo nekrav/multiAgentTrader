@@ -948,6 +948,79 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.backtestChartWrap {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.chartLegendHead {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.backtestChart {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.tradePointLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tradePointLegend li {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 11px;
+  gap: 7px;
+}
+
+.tradePointLegend span {
+  border-radius: 999px;
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+}
+
+.strategyMultiSelect {
+  min-height: 140px;
+}
+
+.chartFilterRow {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chartFilterRow h4 {
+  margin: 0;
+}
+
+.chartFilterRow label {
+  margin: 0;
+  width: min(280px, 50%);
+}
+
+.chartFilterRow select {
+  margin-top: 4px;
+  width: 100%;
+}
+
 .runTaskSummary,
 .guidedPanel,
 .advancedPayload {
@@ -1615,9 +1688,22 @@ h1 {
 }
 
 .marketPrice {
-  align-items: baseline;
-  display: flex;
-  gap: 10px;
+ align-items: baseline;
+ display: flex;
+ gap: 10px;
+ align-items: center;
+}
+
+.marketPriceActions {
+ align-items: stretch;
+ display: flex;
+ flex-direction: column;
+ gap: 6px;
+}
+
+.sourceReferenceButton {
+ height: 28px;
+ padding: 0 10px;
 }
 
 .marketPrice strong {
@@ -1970,6 +2056,291 @@ h1 {
 
 .tradeSidePanel {
   background: var(--panel);
+}
+
+.tradeList {
+  display: grid;
+  gap: 8px;
+}
+
+.signalCarouselBlock {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  background: var(--panel);
+  min-width: 0;
+  overflow: hidden;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.signalCarouselHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.signalCarouselHeader span {
+  font-weight: 850;
+}
+
+.signalCarouselHeader small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* keep this area tight in the main chart panel */
+.signalCarouselControls {
+  align-items: stretch;
+  display: block;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.signalCarouselButton {
+  background: color-mix(in oklab, var(--panel-2) 80%, #000 20%);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px var(--shadow);
+  color: var(--text);
+  cursor: pointer;
+  height: 30px;
+  padding: 0;
+  position: absolute;
+  top: calc(50% + 10px);
+  transform: translateY(-50%);
+  width: 30px;
+  z-index: 3;
+}
+
+.signalCarouselButtonLeft {
+  left: 4px;
+}
+
+.signalCarouselButtonRight {
+  right: 4px;
+}
+
+.signalCarouselButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.signalCarouselPanel {
+  min-height: 100%;
+  overflow: visible;
+}
+
+.signalCarousel {
+  display: flex;
+  gap: 8px;
+  margin: 0 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  padding: 0 18px 6px;
+  scrollbar-color: var(--cyan) var(--bg);
+  scrollbar-width: thin;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.signalCarouselPanel .signalCarousel {
+  gap: 10px;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  align-items: flex-start;
+}
+
+.signalCarouselPanel .signalCarouselItem {
+  min-width: 100%;
+  max-width: 100%;
+  width: 100%;
+  flex: 0 0 100%;
+  box-sizing: border-box;
+}
+
+.signalCarouselPanel .signalMiniChart {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: block;
+  overflow: hidden;
+  height: 120px;
+  min-height: 120px;
+}
+
+.signalCarouselPanel .signalCarouselButtonLeft,
+.signalCarouselPanel .signalCarouselButtonRight {
+  top: 50%;
+}
+
+.signalCarouselButton {
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.signalCarousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.signalCarousel::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+
+.signalCarousel::-webkit-scrollbar-thumb {
+  background: var(--panel);
+}
+
+.signalCarouselItem {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 4px;
+  min-width: min(320px, 70vw);
+  padding: 8px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  text-decoration: none;
+}
+
+
+.signalCarouselMeta {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.signalCarouselTitle {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 65%;
+}
+
+.signalMoveSquare {
+  border-radius: 2px;
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+  flex: 0 0 auto;
+  background: var(--muted);
+}
+
+.signalMoveSquare.move-buy {
+  background: var(--green);
+}
+
+.signalMoveSquare.move-sell {
+  background: var(--red);
+}
+
+.signalMoveBadge {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 1px 8px;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+
+.signalMoveBadge.move-buy {
+  color: var(--green);
+  border-color: color-mix(in oklab, var(--green) 35%, var(--line));
+}
+
+.signalMoveBadge.move-sell {
+  color: var(--red);
+  border-color: color-mix(in oklab, var(--red) 35%, var(--line));
+}
+
+
+.signalCarouselTimeframe {
+  color: var(--muted);
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.signalCarouselStats {
+  color: var(--text);
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+}
+
+.signalCarouselRisk {
+  color: var(--muted);
+}
+
+.signalMiniChart,
+.signalMiniChartEmpty {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  height: 120px;
+  min-height: 120px;
+  width: 100%;
+  min-width: 0;
+}
+
+.signalMiniChart {
+  fill: none;
+}
+
+.signalMiniChart line {
+  stroke: var(--line);
+  stroke-width: 0.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.signalMiniChart polyline {
+  fill: none;
+  stroke: var(--green);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.signalMiniChart.negativeLine polyline {
+  stroke: var(--red);
+}
+
+.signalMiniChartEmpty {
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.signalMiniChartHint {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .tradeList {
@@ -3838,6 +4209,92 @@ h3 {
   line-height: 1.45;
 }
 
+.pricingSourcesPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.pricingSourcesTable {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  overflow: hidden;
+}
+
+.pricingSourcesRow {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  column-gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) minmax(80px, 0.8fr) minmax(70px, 0.5fr) minmax(170px, 1.2fr) minmax(150px, 1.1fr);
+  padding: 11px 12px;
+}
+
+.pricingSourceLive .sourceDot {
+  background: var(--green);
+}
+
+.pricingSourceFallback .sourceDot {
+  background: var(--muted);
+}
+
+.pricingSourcesHeader {
+  background: var(--panel);
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+}
+
+.pricingSourcesHeader [role="columnheader"] {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.pricingSourcesRow:first-child {
+  border-top: 0;
+}
+
+.pricingSourcesMarket {
+  display: grid;
+  gap: 2px;
+}
+
+.pricingSourcesMarket small,
+.pricingSourcesSourceCol {
+  color: var(--muted);
+}
+
+.pricingSourcesLink a {
+  font-size: 13px;
+  min-height: 30px;
+  padding: 0 10px;
+  width: fit-content;
+}
+
+.pricingSourcesSourceCol {
+  display: grid;
+  gap: 2px;
+}
+
+.pricingSourcesSourceCol strong {
+  font-size: 14px;
+}
+
+.pricingSourcesSourceCol small {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.sourceDot {
+  background: var(--source-dot, var(--muted));
+  border-radius: 999px;
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+}
+
 .decisionPageHero {
   border-top-color: var(--cyan);
 }
@@ -4545,6 +5002,38 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     position: static;
     margin-top: 10px;
+  }
+
+  .signalCarouselControls {
+    display: block;
+  }
+
+  .signalCarousel {
+    gap: 10px;
+    margin: 0;
+    padding: 0 14px 6px;
+  }
+
+  .signalCarouselItem {
+    min-width: 100%;
+  }
+
+  .signalCarouselPanel .signalCarousel {
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .signalCarouselPanel .signalCarouselItem {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  .signalCarouselPanel .signalMiniChart {
+    height: 120px;
+    min-height: 120px;
   }
 
   .terminalChartFrame {

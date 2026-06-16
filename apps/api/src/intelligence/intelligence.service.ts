@@ -34,19 +34,50 @@ type ExternalNewsAlert = {
 export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
   private readonly newsFeedPath = process.env.NEWS_FEED_PATH ?? "/data/news/latest-news.json";
   private readonly refreshIntervalMs = Number(process.env.ANALYSIS_REFRESH_MS ?? 60_000);
+  private readonly livePriceRefreshMs = Number(process.env.LIVE_PRICE_REFRESH_MS ?? this.refreshIntervalMs);
+  private readonly livePriceTtlMs = Number(process.env.LIVE_PRICE_TTL_MS ?? this.refreshIntervalMs * 3);
+  private readonly livePriceBySymbol = new Map<string, { price: number; updatedAt: number }>();
+  private readonly priorLivePriceBySymbol = new Map<string, number>();
+  private readonly marketDataEndpoint = this.getMarketDataEndpoint();
+  private readonly liveAssetBySymbol = new Map<string, string>([
+    ["EURUSD", "EUR/USD"],
+    ["GBPUSD", "GBP/USD"],
+    ["USDJPY", "USD/JPY"],
+    ["AUDUSD", "AUD/USD"],
+    ["USDCAD", "USD/CAD"],
+    ["USDCHF", "USD/CHF"],
+    ["NZDUSD", "NZD/USD"],
+    ["EURGBP", "EUR/GBP"],
+    ["EURJPY", "EUR/JPY"],
+    ["GBPJPY", "GBP/JPY"],
+    ["BTCUSD", "BTC"],
+    ["ETHUSD", "ETH"],
+  ]);
+
   private refreshTimer?: NodeJS.Timeout;
+  private priceRefreshTimer?: NodeJS.Timeout;
   private runSequence = 0;
   private analysisSnapshot = this.buildAnalysisSnapshot("startup");
+  private refreshingMarketPrices = false;
 
-  onModuleInit() {
+  constructor() {}
+
+  async onModuleInit() {
+    await this.refreshMarketPrices("startup");
     this.refreshAnalysis("startup");
     this.refreshTimer = setInterval(() => this.refreshAnalysis("interval"), this.refreshIntervalMs);
     this.refreshTimer.unref?.();
+
+    this.priceRefreshTimer = setInterval(() => void this.refreshMarketPrices("interval"), this.livePriceRefreshMs);
+    this.priceRefreshTimer.unref?.();
   }
 
   onModuleDestroy() {
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
+    }
+    if (this.priceRefreshTimer) {
+      clearInterval(this.priceRefreshTimer);
     }
   }
 
@@ -400,6 +431,84 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
     this.analysisSnapshot = this.buildAnalysisSnapshot(reason);
   }
 
+  private async refreshMarketPrices(_context: "startup" | "interval" | "request") {
+    if (this.refreshingMarketPrices) {
+      return;
+    }
+    this.refreshingMarketPrices = true;
+
+    try {
+      await Promise.allSettled(
+        Array.from(this.liveAssetBySymbol.entries()).map(async ([symbol, asset]) => {
+          const spotPrice = await this.fetchLiveMarketPrice(asset);
+          if (spotPrice === undefined || spotPrice <= 0 || Number.isNaN(spotPrice)) {
+            return;
+          }
+          this.livePriceBySymbol.set(symbol, { price: spotPrice, updatedAt: Date.now() });
+          if (!this.priorLivePriceBySymbol.has(symbol)) {
+            this.priorLivePriceBySymbol.set(symbol, spotPrice);
+          }
+        }),
+      );
+      this.refreshAnalysis("request");
+    } finally {
+      this.refreshingMarketPrices = false;
+    }
+  }
+
+  private getFreshLivePrice(symbol: string): number | undefined {
+    const value = this.livePriceBySymbol.get(symbol);
+    if (!value) {
+      return undefined;
+    }
+    if (Date.now() - value.updatedAt > this.livePriceTtlMs) {
+      return undefined;
+    }
+    return value.price;
+  }
+
+  private getMarketDataEndpoint() {
+    const defaultEndpoint = "http://market-data-agent:7001";
+    try {
+      const raw = process.env.AGENT_ENDPOINTS_JSON;
+      if (!raw) {
+        return defaultEndpoint;
+      }
+      const endpoints = JSON.parse(raw) as Record<string, string>;
+      return endpoints["market-data"] ?? defaultEndpoint;
+    } catch {
+      return defaultEndpoint;
+    }
+  }
+
+  private async fetchLiveMarketPrice(asset: string): Promise<number | undefined> {
+    try {
+      const response = await fetch(`${this.marketDataEndpoint.replace(/\/$/, "")}/invoke`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task: "snapshot", payload: { asset, granularity: 60, limit: 120 } }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!response.ok || payload?.status !== "ok") {
+        return undefined;
+      }
+      const result = payload.result as Record<string, unknown>;
+      if (
+        typeof result?.spotPrice === "number" &&
+        Number.isFinite(result.spotPrice)
+      ) {
+        return result.spotPrice;
+      }
+      if (typeof result?.spotPrice === "string") {
+        const candidate = Number(result.spotPrice);
+        return Number.isFinite(candidate) ? candidate : undefined;
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private buildAnalysisSnapshot(reason: "startup" | "interval" | "request") {
     const updatedAt = new Date().toISOString();
     const runSequence = this.runSequence + 1;
@@ -426,6 +535,21 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
   private buildLiveMarkets(runSequence: number, updatedAt: string): Market[] {
     const minuteSeed = Math.floor(Date.parse(updatedAt) / 60_000);
     return markets.map((market, index) => {
+      const livePrice = this.getFreshLivePrice(market.symbol);
+      if (livePrice !== undefined) {
+        const previousPrice = this.priorLivePriceBySymbol.get(market.symbol);
+        this.priorLivePriceBySymbol.set(market.symbol, livePrice);
+        const roundedPrice = this.roundMarketPrice(livePrice);
+        const change = previousPrice !== undefined && previousPrice > 0 ? ((roundedPrice - previousPrice) / previousPrice) * 100 : 0;
+        const microWave = Math.sin((minuteSeed + index) / 9) * 0.015;
+        return {
+          ...market,
+          price: roundedPrice,
+          changePct: this.roundChange(change),
+          confidence: this.clamp(market.confidence + microWave),
+        };
+      }
+
       const wave = Math.sin((minuteSeed + index * 7) / 5) * 0.0018;
       const microTrend = Math.cos((runSequence + index * 3) / 4) * 0.0009;
       const priceMultiplier = 1 + wave + microTrend;

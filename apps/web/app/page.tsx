@@ -21,6 +21,7 @@ type DashboardMarket = {
     finalConfidence: number;
     agreementScore: number;
     invalidation: string;
+    timeframe?: string;
   };
   dependency: {
     confirmationScore: number;
@@ -75,6 +76,7 @@ type TradeTicket = {
   symbol: string;
   label: string;
   side: "Buy" | "Sell";
+  timeframe: string;
   entry: string;
   stop: string;
   targetOne: string;
@@ -198,7 +200,7 @@ export default async function Home() {
   const secondaryRecommendations = tradeRecommendations.slice(1, 4);
   const highRiskCount = dashboard.markets.filter((market) => market.risk === "high-risk").length;
   const conflictCount = dashboard.conflicts.length;
-  const initialLiveSymbols = getInitialLiveSymbols(dashboard);
+  const initialLiveSymbols = getInitialLiveSymbols(dashboard, tradeRecommendations);
   const initialCandlesBySymbol = Object.fromEntries(
     await Promise.all(
       initialLiveSymbols.map(async (symbol) => [symbol, await getJson<Candle[]>(`/markets/${symbol}/candles`, [])] as const),
@@ -213,7 +215,7 @@ export default async function Home() {
 
       <TraderDecisionPanel
         primary={primaryRecommendation}
-        primaryCandles={primaryRecommendation ? initialCandlesBySymbol[primaryRecommendation.symbol] ?? [] : []}
+        primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
         secondary={secondaryRecommendations}
         watchlist={dashboard.watchlist}
         alerts={dashboard.alerts.slice(0, 2)}
@@ -297,6 +299,13 @@ function DashboardSectionHub({
       title: "Run Analysis",
       summary: "Guided agent workbench with dropdowns, strategy inputs, indicator selections, and advanced JSON.",
       meta: `${catalogCount} agent tasks`,
+    },
+    {
+      href: "/pricing-sources",
+      eyebrow: "Operations",
+      title: "Pricing Sources",
+      summary: "Verify each market price against the live references and fallback mapping used in dashboard feeds.",
+      meta: "Price transparency",
     },
     {
       href: "/reports",
@@ -461,6 +470,7 @@ function DecisionSupportRoadmap({
                 <div>
                   <span>{ticket.side}</span>
                   <strong>{ticket.label}</strong>
+                  <small>{ticket.timeframe}</small>
                 </div>
                 <dl>
                   <div>
@@ -667,7 +677,7 @@ function TraderDecisionPanel({
             {secondary.map((market) => (
               <a href={`/markets/${market.symbol}`} className="tradeListItem" key={market.symbol}>
                 <strong>{market.move} {market.label}</strong>
-                <small>{formatPercent(market.consensus.finalConfidence)} confidence · {formatPercent(market.dependency.conflictScore)} conflict</small>
+                <small>{formatPercent(market.recommendationScore)} score · {formatPercent(market.dependency.conflictScore)} conflict</small>
               </a>
             ))}
           </div>
@@ -777,10 +787,9 @@ function StackedMarkets({ markets, conflict = false }: { markets: DashboardMarke
   );
 }
 
-function getInitialLiveSymbols(dashboard: Dashboard) {
-  const recommendations = buildTradeRecommendations(dashboard.markets).slice(0, 5);
+function getInitialLiveSymbols(dashboard: Dashboard, opportunities: TradeRecommendation[]) {
   const symbols = new Set<string>();
-  [...recommendations, ...dashboard.watchlist].forEach((market) => symbols.add(market.symbol));
+  [...opportunities, ...dashboard.watchlist].forEach((market) => symbols.add(market.symbol));
   return dashboard.markets
     .filter((market) => symbols.has(market.symbol))
     .slice(0, 8)
@@ -853,6 +862,7 @@ function buildTradeTickets(opportunities: OpportunityRow[]): TradeTicket[] {
         side: market.move,
         entry: `${formatPrice(Math.min(entryLow, entryHigh))}-${formatPrice(Math.max(entryLow, entryHigh))}`,
         stop: formatPrice(stop),
+        timeframe: market.consensus.timeframe ?? "1H",
         targetOne: formatPrice(targetOne),
         targetTwo: formatPrice(targetTwo),
         riskReward: "1.5R / 2.4R",

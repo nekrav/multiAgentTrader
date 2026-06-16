@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
-import { HeroIntelMenu } from "./hero-intel-menu";
 import { TopNav } from "./top-nav";
+import { HeroIntelMenu } from "./hero-intel-menu";
+import { getPriceReference } from "./lib/pricing-references";
 
 type Bias = "bullish" | "bearish" | "neutral";
 
@@ -150,6 +151,14 @@ function CategoryMarketCard({ market }: { market: DashboardMarket }) {
       <div className="marketPrice">
         <strong>{formatPrice(market.price)}</strong>
         <span className={market.changePct >= 0 ? "positive" : "negative"}>{formatPercent(market.changePct / 100)}</span>
+        <a
+          href={getPriceReference(market.symbol).referenceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="secondaryButton sourceReferenceButton"
+        >
+          Source
+        </a>
       </div>
       <p>{market.summary}</p>
       <div className="miniBars">
