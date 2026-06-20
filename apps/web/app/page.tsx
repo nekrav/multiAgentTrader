@@ -204,7 +204,10 @@ export default async function Home() {
   const initialLiveSymbols = getInitialLiveSymbols(dashboard, tradeRecommendations);
   const initialCandlesBySymbol = Object.fromEntries(
     await Promise.all(
-      initialLiveSymbols.map(async (symbol) => [symbol, await getJson<Candle[]>(`/markets/${symbol}/candles`, [])] as const),
+      initialLiveSymbols.map(async (symbol) => [
+        symbol,
+        await getJson<Candle[]>(`/markets/${encodeURIComponent(symbol)}/candles`, []),
+      ] as const),
     ),
   );
 
@@ -754,12 +757,22 @@ function StackedMarkets({ markets, conflict = false }: { markets: DashboardMarke
 }
 
 function getInitialLiveSymbols(dashboard: Dashboard, opportunities: TradeRecommendation[]) {
-  const symbols = new Set<string>();
-  [...opportunities, ...dashboard.watchlist].forEach((market) => symbols.add(market.symbol));
-  return dashboard.markets
-    .filter((market) => symbols.has(market.symbol))
-    .slice(0, 8)
-    .map((market) => market.symbol);
+  const prioritizedSymbols: string[] = [
+    ...opportunities.slice(0, 4).map((market) => market.symbol),
+    ...dashboard.watchlist.map((market) => market.symbol),
+    ...opportunities.map((market) => market.symbol),
+  ];
+
+  const dashboardSymbols = new Set(dashboard.markets.map((market) => market.symbol));
+  const symbols: string[] = [];
+
+  for (const symbol of prioritizedSymbols) {
+    if (!symbols.includes(symbol) && dashboardSymbols.has(symbol) && symbols.length < 8) {
+      symbols.push(symbol);
+    }
+  }
+
+  return symbols;
 }
 
 function buildTradeRecommendations(markets: DashboardMarket[]): TradeRecommendation[] {
