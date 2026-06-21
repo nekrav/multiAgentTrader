@@ -6111,3 +6111,184 @@ a:hover {
   color: var(--blue);
 }
 
+/* Signature refresh — Task 6: component refinements */
+.navLinks a,
+.navGroup summary {
+  font-weight: 600;
+  padding: 9px 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+}
+
+.navLinks a:hover,
+.navGroup summary:hover {
+  background: var(--inset);
+}
+
+.navLinks a[aria-current="page"],
+.navLinks a.active {
+  background: var(--inset);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.themeToggle span {
+  color: var(--blue);
+}
+
+.avatarCircle {
+  color: var(--green);
+}
+
+.primaryButton,
+.invokeRow button {
+  background: var(--green);
+  color: var(--on-accent);
+  border: 0;
+  font-weight: 800;
+}
+
+.secondaryButton {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  font-weight: 700;
+}
+
+.secondaryButton:hover {
+  border-color: var(--blue);
+}
+
+.metricTile strong,
+.metric strong {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.metric.good strong {
+  color: var(--green);
+}
+
+.metric.warn strong {
+  color: var(--yellow);
+}
+
+.metric.bad strong {
+  color: var(--red);
+}
+
+.barTrack {
+  background: var(--inset);
+  border: 0;
+  border-radius: var(--radius-pill);
+  height: 7px;
+}
+
+.barFill {
+  border-radius: inherit;
+  transition: width .18s ease;
+}
+
+.barFill.good {
+  background: var(--green);
+}
+
+.barFill.warn {
+  background: var(--yellow);
+}
+
+.barFill.bad {
+  background: var(--red);
+}
+
+.barFill.neutral {
+  background: var(--line-strong);
+}
+
+.status,
+.resultChip {
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+}
+
+.status-succeeded,
+.resultChip.good {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.status-queued,
+.status-running {
+  background: rgba(77,163,255,.14);
+  color: var(--blue);
+}
+
+.status-failed,
+.status-refunded,
+.resultChip.bad {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.resultChip.warn {
+  background: var(--yellow-soft);
+  color: var(--yellow);
+}
+
+.heroTabs button {
+  font-family: var(--font-mono);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+}
+
+.heroTabs button.active,
+.heroTabs button:hover {
+  color: var(--blue);
+  border-color: var(--line-strong);
+}
+
+.tagRow span {
+  border-radius: var(--radius-pill);
+  background: var(--panel-2);
+}
+
+.marketDataTable th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.marketDataTable td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.marketChart {
+  background: var(--inset);
+  border-radius: var(--radius-sm);
+}
+
+.lineChartPath.good {
+  stroke: var(--green);
+  stroke-width: 2.4;
+}
+
+.lineChartPath.bad {
+  stroke: var(--red);
+}
+
+.lineChartGrid {
+  stroke: var(--line);
+  stroke-dasharray: 2 5;
+}
+
