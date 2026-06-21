@@ -1,34 +1,65 @@
 :root {
   color-scheme: dark;
-  --bg: #0f1513;
-  --panel: var(--bg);
-  --panel-2: var(--bg);
-  --text: #f1f5f2;
-  --muted: #8f9a94;
-  --line: #29322f;
-  --green: #00c853;
-  --yellow: #f5c542;
-  --red: #ff5252;
-  --cyan: #4cc9f0;
-  --on-accent: #06100b;
-  --shadow: rgba(0, 0, 0, 0.32);
+
+  /* surfaces — was all equal to --bg; now layered */
+  --bg:        #070b09;
+  --panel:     #0d1310;
+  --panel-2:   #101713;
+  --inset:     #0a0f0c;
+
+  --text:   #eaf1ed;
+  --muted:  #8b958f;
+  --faint:  #5a645e;
+
+  --line:        #232b27;
+  --line-strong: #323c37;
+
+  --green:       #3fe08a;
+  --green-soft:  rgba(63,224,138,0.14);
+  --red:         #ff6b6b;
+  --red-soft:    rgba(255,107,107,0.14);
+  --yellow:      #e6b450;
+  --yellow-soft: rgba(230,180,80,0.14);
+
+  --cyan:      #4da3ff;
+  --blue:      var(--cyan);
+  --on-accent: #06231a;
+
+  --shadow: rgba(0,0,0,0.40);
+
+  --radius:      12px;
+  --radius-sm:   10px;
+  --radius-pill: 999px;
+  --pad:         18px;
+  --gap:         16px;
+
+  --font-ui:   "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f6f8f5;
-  --panel: #ffffff;
-  --panel-2: #eef3ef;
-  --text: #14221b;
-  --muted: #5f6f66;
-  --line: #d6e1da;
-  --green: #008f45;
-  --yellow: #9a6a00;
-  --red: #c83f3f;
-  --cyan: #087ea4;
-  --on-accent: #ffffff;
-  --shadow: rgba(20, 34, 27, 0.12);
+  --bg:        #f4f7f3;
+  --panel:     #ffffff;
+  --panel-2:   #eef3ef;
+  --inset:     #e9efe9;
+  --text:      #112019;
+  --muted:     #5f6f66;
+  --faint:     #8a948d;
+  --line:        #dde6df;
+  --line-strong: #c5d2c9;
+  --green:       #00a152;
+  --green-soft:  rgba(0,161,82,0.12);
+  --red:         #d4433f;
+  --red-soft:    rgba(212,67,63,0.12);
+  --yellow:      #9a6a00;
+  --yellow-soft: rgba(154,106,0,0.12);
+  --cyan:        #1f74d6;
+  --blue:        var(--cyan);
+  --on-accent:   #ffffff;
+  --shadow:      rgba(20,34,27,0.12);
 }
+
 
 * {
   box-sizing: border-box;
