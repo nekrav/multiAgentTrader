@@ -6000,3 +6000,42 @@ textarea {
   text-transform: uppercase;
 }
 
+/* Signature refresh — Task 4: radius scale */
+.agent,
+.empty,
+.metricTile,
+.planCard,
+.reportCard,
+.panelBlock,
+.marketCard,
+.agentOutput,
+.dependencyCard,
+.crossMarketCard,
+.heroPanel,
+.marketDetailHero,
+.categoryHero,
+.topNav,
+.navMenu,
+.resultPanel,
+.backtestChartWrap {
+  border-radius: var(--radius);
+}
+
+.primaryButton,
+.secondaryButton,
+.invokeRow input,
+.invokeRow button,
+.paramGrid input,
+.paramGrid select,
+.jsonTextarea,
+.textareaLabel textarea,
+.historyRow,
+.catalogCard,
+.chainPill,
+.chainStep,
+.inputExampleCard,
+.metric,
+.marketChart {
+  border-radius: var(--radius-sm);
+}
+
