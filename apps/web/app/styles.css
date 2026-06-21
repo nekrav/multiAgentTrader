@@ -5971,3 +5971,32 @@ textarea {
     grid-column: span 2;
   }
 }
+
+/* Signature refresh — Task 3: tracked monospace labels */
+.eyebrow {
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.eyebrow.pos {
+  color: var(--green);
+}
+
+.runTaskSummary span,
+.formSectionTitle,
+.guidedPanelTop span,
+.metricTile span,
+.metric span,
+.chartTitleRow span,
+.newsItem span,
+.marketDataTable caption {
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
