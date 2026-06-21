@@ -27,7 +27,6 @@ const navGroups = [
     items: [
       { href: "/run", label: "Run Analysis" },
       { href: "/backtesting", label: "Backtesting" },
-      { href: "/pricing-sources", label: "Pricing Sources" },
       { href: "/setups", label: "Trade Setups" },
       { href: "/history", label: "Saved Analyses" },
       { href: "/alerts", label: "Alerts" },

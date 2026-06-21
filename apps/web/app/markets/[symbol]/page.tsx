@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { TopNav } from "../../top-nav";
-import { getPriceReference } from "../../lib/pricing-references";
 
 type MarketDetail = {
   symbol: string;
@@ -85,14 +84,6 @@ export default async function MarketPage({ params }: { params: Promise<{ symbol:
         <div className="heroStats">
           <div className="marketPriceActions">
             <Metric label="Price" value={market.price > 50 ? market.price.toFixed(2) : market.price.toFixed(4)} />
-            <a
-              href={getPriceReference(market.symbol, market.label).referenceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="secondaryButton sourceReferenceButton"
-            >
-              Open source
-            </a>
           </div>
           <Metric label="Bias" value={market.consensus.finalBias} />
           <Metric label="Confidence" value={pct(market.consensus.finalConfidence)} />

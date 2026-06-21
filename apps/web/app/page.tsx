@@ -308,13 +308,6 @@ function DashboardSectionHub({
       meta: `${catalogCount} agent tasks`,
     },
     {
-      href: "/pricing-sources",
-      eyebrow: "Operations",
-      title: "Pricing Sources",
-      summary: "Verify each market price against the live references and fallback mapping used in dashboard feeds.",
-      meta: "Price transparency",
-    },
-    {
       href: "/reports",
       eyebrow: "Reports",
       title: "Research Summaries",

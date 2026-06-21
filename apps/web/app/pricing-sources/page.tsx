@@ -1,6 +1,5 @@
 import { TopNav } from "../top-nav";
 import { getDashboard } from "../market-category-page";
-import { getPriceReference } from "../lib/pricing-references";
 
 export default async function PricingSourcesPage() {
   const dashboard = await getDashboard();
@@ -10,11 +9,6 @@ export default async function PricingSourcesPage() {
     }
     return a.assetClass.localeCompare(b.assetClass);
   });
-
-  const rows = markets.map((market) => ({
-    market,
-    reference: getPriceReference(market.symbol, market.label),
-  }));
 
   return (
     <main className="shell intelligenceShell">
@@ -47,16 +41,11 @@ export default async function PricingSourcesPage() {
             <span role="columnheader">Market</span>
             <span role="columnheader">Price</span>
             <span role="columnheader">Change</span>
-            <span role="columnheader">Price source</span>
-            <span role="columnheader">Reference</span>
+            <span role="columnheader">Price status</span>
           </div>
 
-          {rows.map(({ market, reference }) => (
-            <div
-              className={`pricingSourcesRow ${reference.dataMode === "live" ? "pricingSourceLive" : "pricingSourceFallback"}`}
-              role="row"
-              key={market.symbol}
-            >
+          {markets.map((market) => (
+            <div className="pricingSourcesRow pricingSourceLive" role="row" key={market.symbol}>
               <span role="cell" className="pricingSourcesMarket">
                 <a href={`/markets/${market.symbol}`}>{market.label}</a>
                 <small>{market.assetClass}</small>
@@ -68,30 +57,18 @@ export default async function PricingSourcesPage() {
                 {formatPercent(market.changePct / 100)}
               </span>
               <span role="cell" className="pricingSourcesSourceCol">
-                <strong>{reference.provider}</strong>
+                <strong>Dashboard feed</strong>
                 <small>
                   <span className="sourceDot" aria-hidden="true" />
-                  {reference.dataMode === "live" ? "Live feed" : "Synthetic / fallback"}
+                  Internal price feed
                 </small>
-              </span>
-              <span role="cell" className="pricingSourcesLink">
-                <a
-                  href={reference.referenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="secondaryButton"
-                  title={`Open ${reference.websiteLabel}`}
-                >
-                  Open {reference.websiteLabel}
-                </a>
               </span>
             </div>
           ))}
         </div>
 
         <p className="quiet">
-          FX symbols and BTC/ETH/SOL are pulled from the live market-data pipeline. Remaining pages resolve to the configured
-          reference pages for manual verification.
+          Market prices are displayed from the app dashboard feed without external source links.
         </p>
       </section>
     </main>
