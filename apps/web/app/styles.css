@@ -6039,3 +6039,75 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
+/* Signature refresh — Task 5: recessed wells + accent discipline */
+:root {
+  color-scheme: dark;
+  --bg:        #070b09;
+  --panel:     #0d1310;
+  --panel-2:   #101713;
+  --inset:     #0a0f0c;
+  --text:      #eaf1ed;
+  --muted:     #8b958f;
+  --faint:     #5a645e;
+  --line:        #232b27;
+  --line-strong: #323c37;
+  --green:       #3fe08a;
+  --green-soft:  rgba(63,224,138,0.14);
+  --red:         #ff6b6b;
+  --red-soft:    rgba(255,107,107,0.14);
+  --yellow:      #e6b450;
+  --yellow-soft: rgba(230,180,80,0.14);
+  --cyan:      #4da3ff;
+  --blue:      var(--cyan);
+  --on-accent: #06231a;
+  --shadow: rgba(0,0,0,0.40);
+  --radius:      12px;
+  --radius-sm:   10px;
+  --radius-pill: 999px;
+  --pad:         18px;
+  --gap:         16px;
+  --font-ui:   "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+.invokeRow input,
+.paramGrid input,
+.paramGrid select,
+.jsonTextarea,
+.textareaLabel textarea,
+.result,
+.marketChart,
+.barTrack {
+  background: var(--inset);
+}
+
+.catalogCard.active,
+.historyRow.active,
+.chainPill.active {
+  border-color: var(--line-strong);
+  box-shadow: inset 2px 0 0 var(--blue);
+}
+
+.catalogCard:hover,
+.historyRow:hover,
+.chainPill:hover,
+.inputExampleCard:hover,
+.newsItem:hover,
+.dashboardSectionCard:hover,
+.strategyMoreLink:hover,
+.resultDrawer summary:hover,
+.opportunityRow:not(.opportunityHead):hover {
+  border-color: var(--line-strong);
+  color: var(--blue);
+}
+
+.themeToggle:hover,
+a:hover {
+  color: var(--blue);
+}
+
