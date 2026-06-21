@@ -6382,3 +6382,27 @@ a:hover {
   font-family: var(--font-mono);
 }
 
+/* Signature refresh — light token sync (overrides older QA/theme patches) */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:        #f4f7f3;
+  --panel:     #ffffff;
+  --panel-2:   #eef3ef;
+  --inset:     #e9efe9;
+  --text:      #112019;
+  --muted:     #5f6f66;
+  --faint:     #8a948d;
+  --line:        #dde6df;
+  --line-strong: #c5d2c9;
+  --green:       #00a152;
+  --green-soft:  rgba(0,161,82,0.12);
+  --red:         #d4433f;
+  --red-soft:    rgba(212,67,63,0.12);
+  --yellow:      #9a6a00;
+  --yellow-soft: rgba(154,106,0,0.12);
+  --cyan:        #1f74d6;
+  --blue:        var(--cyan);
+  --on-accent:   #ffffff;
+  --shadow:      rgba(20,34,27,0.12);
+}
+
