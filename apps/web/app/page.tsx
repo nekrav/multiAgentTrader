@@ -217,6 +217,13 @@ export default async function Home() {
 
       <LiveHomeDashboard initialDashboard={dashboard} initialCandlesBySymbol={initialCandlesBySymbol} />
 
+      <BeginnerSnapshot
+        primary={primaryRecommendation}
+        marketCount={dashboard.markets.length}
+        conflictCount={conflictCount}
+        highRiskCount={highRiskCount}
+      />
+
       <TraderDecisionPanel
         primary={primaryRecommendation}
         primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
@@ -246,6 +253,58 @@ export default async function Home() {
         catalogCount={catalog.length}
       />
     </main>
+  );
+}
+
+function BeginnerSnapshot({
+  primary,
+  marketCount,
+  conflictCount,
+  highRiskCount,
+}: {
+  primary?: TradeRecommendation;
+  marketCount: number;
+  conflictCount: number;
+  highRiskCount: number;
+}) {
+  const move = primary?.move ?? "Watch";
+  const confidence = primary ? formatPercent(primary.recommendationScore) : "n/a";
+  const riskLine = highRiskCount > 0
+    ? `${highRiskCount} risky market${highRiskCount === 1 ? "" : "s"} flagged`
+    : "No high-risk markets flagged";
+
+  return (
+    <section className="beginnerSnapshot" aria-label="Beginner friendly market summary">
+      <div className="beginnerHeroCopy">
+        <span>Simple View</span>
+        <h1>Today’s easiest read</h1>
+        <p>
+          A calmer dashboard that explains the next move in plain English. Use Technical when you want the full trading desk back.
+        </p>
+      </div>
+      <div className={`beginnerActionCard move-${move.toLowerCase()}`}>
+        <span>Top idea</span>
+        <strong>{primary ? `${move} ${primary.label}` : "No clear move yet"}</strong>
+        <small>{primary ? primary.summary : "Waiting for agent agreement across markets."}</small>
+      </div>
+      <div className="beginnerSteps">
+        <div>
+          <span>1</span>
+          <strong>Check direction</strong>
+          <small>{confidence} confidence from the agents</small>
+        </div>
+        <div>
+          <span>2</span>
+          <strong>Check risk</strong>
+          <small>{riskLine}</small>
+        </div>
+        <div>
+          <span>3</span>
+          <strong>Open details</strong>
+          <small>{conflictCount} conflict{conflictCount === 1 ? "" : "s"} across {marketCount} markets</small>
+        </div>
+      </div>
+    </section>
   );
 }
 

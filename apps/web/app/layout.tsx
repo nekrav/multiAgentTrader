@@ -22,10 +22,12 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookieStore = await cookies();
   const savedTheme = cookieStore.get("aitraders-theme")?.value;
+  const savedDesign = cookieStore.get("aitraders-design")?.value;
   const theme = savedTheme === "light" ? "light" : "dark";
+  const design = savedDesign === "simple" ? "simple" : "technical";
 
   return (
-    <html lang="en" data-theme={theme} suppressHydrationWarning>
+    <html lang="en" data-theme={theme} data-design={design} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

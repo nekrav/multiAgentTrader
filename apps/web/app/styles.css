@@ -6406,3 +6406,340 @@ a:hover {
   --shadow:      rgba(20,34,27,0.12);
 }
 
+/* Beginner-friendly design mode: calmer, card-first, plain-language dashboard. */
+:root[data-design="simple"] {
+  --bg: #101613;
+  --panel: #17211b;
+  --panel-2: #203026;
+  --inset: #0d1511;
+  --text: #f5fbf6;
+  --muted: #bfd0c4;
+  --faint: #8ea197;
+  --line: #30453a;
+  --line-strong: #5d776b;
+  --green: #56e391;
+  --red: #ff817d;
+  --yellow: #ffd166;
+  --cyan: #7dd8ff;
+  --blue: var(--cyan);
+  --shadow: rgba(0, 0, 0, 0.28);
+  --radius: 20px;
+  --radius-sm: 16px;
+}
+
+:root[data-theme="light"][data-design="simple"] {
+  --bg: #f7f3e8;
+  --panel: #fffdf7;
+  --panel-2: #f0eadc;
+  --inset: #ebe3d2;
+  --text: #18241c;
+  --muted: #596a5e;
+  --faint: #859184;
+  --line: #ded3bd;
+  --line-strong: #bcae91;
+  --green: #138a4d;
+  --red: #c64d45;
+  --yellow: #9b6d00;
+  --cyan: #236f8d;
+  --blue: var(--cyan);
+  --shadow: rgba(65, 45, 20, 0.12);
+}
+
+.designToggle {
+  align-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 8px;
+  min-height: 46px;
+  padding: 5px 11px 5px 5px;
+}
+
+.designToggle span {
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--green);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.designToggle strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.designToggle:hover {
+  border-color: var(--green);
+}
+
+.beginnerSnapshot {
+  display: none;
+}
+
+:root[data-design="simple"] body {
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--green) 18%, transparent), transparent 26rem),
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--cyan) 15%, transparent), transparent 24rem),
+    var(--bg);
+  font-feature-settings: normal;
+}
+
+:root[data-design="simple"] .shell {
+  max-width: 1240px;
+  padding: 22px clamp(16px, 3vw, 34px) 52px;
+}
+
+:root[data-design="simple"] .topNav,
+:root[data-design="simple"] .marketTickerDock,
+:root[data-design="simple"] .terminalRail,
+:root[data-design="simple"] .terminalChartPanel,
+:root[data-design="simple"] .terminalIntelPanel,
+:root[data-design="simple"] .dashboardSectionCard,
+:root[data-design="simple"] .marketCard,
+:root[data-design="simple"] .panelBlock,
+:root[data-design="simple"] .metricTile,
+:root[data-design="simple"] .tradeListBlock,
+:root[data-design="simple"] .tradeListItem,
+:root[data-design="simple"] .tickerUpdated,
+:root[data-design="simple"] .tickerChart,
+:root[data-design="simple"] .tickerMove,
+:root[data-design="simple"] .accountAvatar,
+:root[data-design="simple"] .themeToggle,
+:root[data-design="simple"] .designToggle {
+  border-radius: var(--radius);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--shadow) 70%, transparent);
+}
+
+:root[data-design="simple"] .navLinks a,
+:root[data-design="simple"] .navGroup summary {
+  border-radius: 999px;
+  font-size: 14px;
+  padding: 10px 13px;
+}
+
+:root[data-design="simple"] .designToggle {
+  background: color-mix(in srgb, var(--green) 14%, var(--panel-2));
+  border-color: color-mix(in srgb, var(--green) 42%, var(--line));
+}
+
+:root[data-design="simple"] .beginnerSnapshot {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--green) 16%, transparent), transparent 46%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--shadow) 78%, transparent);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.82fr);
+  padding: clamp(20px, 3vw, 34px);
+}
+
+:root[data-design="simple"] .beginnerHeroCopy {
+  display: grid;
+  gap: 10px;
+}
+
+:root[data-design="simple"] .beginnerHeroCopy span,
+:root[data-design="simple"] .beginnerActionCard span,
+:root[data-design="simple"] .beginnerSteps span {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+:root[data-design="simple"] .beginnerHeroCopy h1 {
+  font-size: clamp(34px, 5vw, 64px);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  max-width: 720px;
+}
+
+:root[data-design="simple"] .beginnerHeroCopy p {
+  color: var(--muted);
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.55;
+  max-width: 640px;
+}
+
+:root[data-design="simple"] .beginnerActionCard {
+  align-content: center;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 8px solid var(--green);
+  border-radius: 24px;
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+}
+
+:root[data-design="simple"] .beginnerActionCard.move-sell {
+  border-left-color: var(--red);
+}
+
+:root[data-design="simple"] .beginnerActionCard.move-watch {
+  border-left-color: var(--yellow);
+}
+
+:root[data-design="simple"] .beginnerActionCard strong {
+  font-size: clamp(24px, 3vw, 38px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+:root[data-design="simple"] .beginnerActionCard small {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+:root[data-design="simple"] .beginnerSteps {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+:root[data-design="simple"] .beginnerSteps div {
+  background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+}
+
+:root[data-design="simple"] .beginnerSteps strong {
+  font-size: 18px;
+}
+
+:root[data-design="simple"] .beginnerSteps small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+:root[data-design="simple"] .marketTickerDock {
+  grid-template-columns: 1fr;
+  padding: 10px;
+}
+
+:root[data-design="simple"] .tickerCharts {
+  grid-auto-columns: minmax(168px, 1fr);
+}
+
+:root[data-design="simple"] .tickerChart,
+:root[data-design="simple"] .tickerMove,
+:root[data-design="simple"] .tickerUpdated {
+  padding: 12px;
+}
+
+:root[data-design="simple"] .tickerChart span,
+:root[data-design="simple"] .tickerMove span,
+:root[data-design="simple"] .tickerUpdated span,
+:root[data-design="simple"] .terminalPanelTitle span,
+:root[data-design="simple"] .eyebrow,
+:root[data-design="simple"] .signalPill span,
+:root[data-design="simple"] .decisionStack small,
+:root[data-design="simple"] .terminalWatchItem small {
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-design="simple"] .tickerChart strong,
+:root[data-design="simple"] .tickerMove strong,
+:root[data-design="simple"] .tickerUpdated strong {
+  font-family: var(--font-ui);
+  font-size: 17px;
+}
+
+:root[data-design="simple"] .terminalHero {
+  gap: 18px;
+  grid-template-columns: minmax(240px, 0.65fr) minmax(0, 1.35fr);
+}
+
+:root[data-design="simple"] .terminalIntelPanel {
+  grid-column: 1 / -1;
+}
+
+:root[data-design="simple"] .terminalChartPanel {
+  padding: clamp(16px, 2vw, 24px);
+}
+
+:root[data-design="simple"] .terminalChartPanel .tradePanelTop h1 {
+  font-size: clamp(34px, 4vw, 58px);
+}
+
+:root[data-design="simple"] .signalRail,
+:root[data-design="simple"] .terminalChartPanel .signalRail,
+:root[data-design="simple"] .decisionMetrics {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+:root[data-design="simple"] .signalPill,
+:root[data-design="simple"] .metricTile,
+:root[data-design="simple"] .tradeRationale div {
+  padding: 14px;
+}
+
+:root[data-design="simple"] .signalPill strong,
+:root[data-design="simple"] .metricTile strong {
+  font-size: 20px;
+}
+
+:root[data-design="simple"] .terminalChartFrame,
+:root[data-design="simple"] .terminalHeroChart,
+:root[data-design="simple"] .terminalChartEmpty {
+  height: clamp(240px, 28vw, 360px);
+}
+
+:root[data-design="simple"] .chartOverlay {
+  border-radius: 18px;
+  padding: 14px;
+}
+
+:root[data-design="simple"] .dashboardSectionGrid {
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+:root[data-design="simple"] .dashboardSectionCard {
+  padding: 18px;
+}
+
+:root[data-design="simple"] .dashboardSectionCard p {
+  -webkit-line-clamp: 4;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  :root[data-design="simple"] .beginnerSnapshot,
+  :root[data-design="simple"] .beginnerSteps,
+  :root[data-design="simple"] .terminalHero {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-design="simple"] .terminalIntelPanel {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .designToggle strong {
+    display: none;
+  }
+}
+

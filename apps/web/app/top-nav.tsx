@@ -54,25 +54,37 @@ type Account = {
 };
 
 type Theme = "dark" | "light";
+type DesignMode = "technical" | "simple";
 
 const themeCookieName = "aitraders-theme";
+const designCookieName = "aitraders-design";
+
+function readCookie(name: string) {
+  return document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${name}=`))
+    ?.split("=")[1];
+}
 
 function readThemeCookie(): Theme | null {
-  const cookie = document.cookie
-    .split("; ")
-    .find((entry) => entry.startsWith(`${themeCookieName}=`));
-  const value = cookie?.split("=")[1];
+  const value = readCookie(themeCookieName);
   return value === "light" || value === "dark" ? value : null;
 }
 
-function saveThemeCookie(theme: Theme) {
-  document.cookie = `${themeCookieName}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax`;
+function readDesignCookie(): DesignMode | null {
+  const value = readCookie(designCookieName);
+  return value === "simple" || value === "technical" ? value : null;
+}
+
+function saveCookie(name: string, value: string) {
+  document.cookie = `${name}=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 export function TopNav() {
   const apiHealthUrl = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/health`;
   const [account, setAccount] = useState<Account | null>(null);
   const [theme, setTheme] = useState<Theme>("dark");
+  const [designMode, setDesignMode] = useState<DesignMode>("technical");
 
   useEffect(() => {
     if (!getToken()) {
@@ -90,15 +102,27 @@ export function TopNav() {
     const savedTheme = readThemeCookie();
     const activeTheme =
       savedTheme ?? (document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    const savedDesign = readDesignCookie();
+    const activeDesign =
+      savedDesign ?? (document.documentElement.dataset.design === "simple" ? "simple" : "technical");
     document.documentElement.dataset.theme = activeTheme;
+    document.documentElement.dataset.design = activeDesign;
     setTheme(activeTheme);
+    setDesignMode(activeDesign);
   }, []);
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "light" ? "dark" : "light";
     document.documentElement.dataset.theme = nextTheme;
-    saveThemeCookie(nextTheme);
+    saveCookie(themeCookieName, nextTheme);
     setTheme(nextTheme);
+  }
+
+  function toggleDesignMode() {
+    const nextDesignMode: DesignMode = designMode === "simple" ? "technical" : "simple";
+    document.documentElement.dataset.design = nextDesignMode;
+    saveCookie(designCookieName, nextDesignMode);
+    setDesignMode(nextDesignMode);
   }
 
   const displayName = account?.user.displayName || account?.user.email.split("@")[0];
@@ -146,6 +170,16 @@ export function TopNav() {
           ))}
         </div>
         <div className="navActions">
+          <button
+            className="designToggle"
+            type="button"
+            aria-label={`Switch to ${designMode === "simple" ? "technical" : "beginner friendly"} design`}
+            aria-pressed={designMode === "simple"}
+            onClick={toggleDesignMode}
+          >
+            <span aria-hidden="true">{designMode === "simple" ? "B" : "T"}</span>
+            <strong>{designMode === "simple" ? "Beginner" : "Technical"}</strong>
+          </button>
           <button
             className="themeToggle"
             type="button"
