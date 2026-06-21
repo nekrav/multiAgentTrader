@@ -6292,3 +6292,93 @@ a:hover {
   stroke-dasharray: 2 5;
 }
 
+/* Signature refresh — Task 7: Copilot page component classes */
+.verdictTag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+.verdictTag.buy {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid color-mix(in srgb, var(--green) 40%, transparent);
+}
+
+.verdictTag.sell {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid color-mix(in srgb, var(--red) 40%, transparent);
+}
+
+.verdictTag.hold {
+  background: var(--yellow-soft);
+  color: var(--yellow);
+  border: 1px solid color-mix(in srgb, var(--yellow) 40%, transparent);
+}
+
+.agentRow {
+  display: grid;
+  grid-template-columns: 160px 1fr 42px;
+  align-items: center;
+  gap: 12px;
+}
+
+.agentRow .name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.agentRow .name small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.agentRow .pct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-weight: 600;
+}
+
+.msgUser {
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+}
+
+.composer {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 14px var(--pad);
+}
+
+.composer .send {
+  background: var(--green);
+  color: var(--on-accent);
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+}
+
+.followup {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.followup .slash {
+  color: var(--blue);
+  font-family: var(--font-mono);
+}
+
