@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **multiAgentTrader** (1306 symbols, 3019 relationships, 105 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **multiAgentTrader** (1321 symbols, 3037 relationships, 107 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -97,5 +97,25 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Work in the App area (115 symbols) | `.claude/skills/generated/app/SKILL.md` |
+| Work in the Agents area (74 symbols) | `.claude/skills/generated/agents/SKILL.md` |
+| Work in the Intelligence area (38 symbols) | `.claude/skills/generated/intelligence/SKILL.md` |
+| Work in the Runs area (30 symbols) | `.claude/skills/generated/runs/SKILL.md` |
+| Work in the Run area (28 symbols) | `.claude/skills/generated/run/SKILL.md` |
+| Work in the Decision-support area (19 symbols) | `.claude/skills/generated/decision-support/SKILL.md` |
+| Work in the Tests area (18 symbols) | `.claude/skills/generated/tests/SKILL.md` |
+| Work in the Backtesting area (18 symbols) | `.claude/skills/generated/backtesting/SKILL.md` |
+| Work in the Setups area (14 symbols) | `.claude/skills/generated/setups/SKILL.md` |
+| Work in the Aitraders area (12 symbols) | `.claude/skills/generated/aitraders/SKILL.md` |
+| Work in the Credits area (10 symbols) | `.claude/skills/generated/credits/SKILL.md` |
+| Work in the News-feed-updater area (9 symbols) | `.claude/skills/generated/news-feed-updater/SKILL.md` |
+| Work in the Auth area (8 symbols) | `.claude/skills/generated/auth/SKILL.md` |
+| Work in the Catalog area (6 symbols) | `.claude/skills/generated/catalog/SKILL.md` |
+| Work in the Cluster_84 area (5 symbols) | `.claude/skills/generated/cluster-84/SKILL.md` |
+| Work in the Risk area (4 symbols) | `.claude/skills/generated/risk/SKILL.md` |
+| Work in the Strategy-research area (4 symbols) | `.claude/skills/generated/strategy-research/SKILL.md` |
+| Work in the Market-data area (4 symbols) | `.claude/skills/generated/market-data/SKILL.md` |
+| Work in the Event-analysis area (4 symbols) | `.claude/skills/generated/event-analysis/SKILL.md` |
+| Work in the Users area (4 symbols) | `.claude/skills/generated/users/SKILL.md` |
 
 <!-- gitnexus:end -->

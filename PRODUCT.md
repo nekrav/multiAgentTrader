@@ -6,28 +6,28 @@ product
 
 ## Users
 
-Active traders, strategy builders, and operators using AiTraders as a multi-agent market intelligence cockpit. They need dense signal review, fast market scanning, backtest confidence, risk veto visibility, and deterministic trade-readiness evidence without decorative friction.
+Beginner-to-intermediate traders, strategy builders, and operators using AiTraders to understand market opportunities without feeling buried in technical terminal language. They need clear next steps, familiar navigation, friendly cards, confidence/risk context, and simple explanations before deeper analysis.
 
 ## Product Purpose
 
-AiTraders combines market data, strategy research, risk review, event analysis, backtesting, and post-trade review into one disciplined trading dashboard. Success means a trader can see what to watch, what to avoid, why the agents agree or conflict, and what deterministic gates still matter before execution.
+AiTraders combines market data, strategy research, risk review, event analysis, backtesting, and post-trade review into an approachable trading workspace. Success means a user can quickly see what to watch, what action is suggested, why it matters, and where to go next — while deterministic gates and risk controls remain visible.
 
 ## Brand Personality
 
-Professional, tactical, precise. The product should feel like a serious trading terminal with the clarity of Raycast-grade product UI: dense, sharp, dark, fast, and trustworthy.
+Friendly, clear, confident. The product should feel closer to Facebook/X/Asana/Trello/TradingView: light, familiar, card-based, social-feed readable, and easy on the eyes — not a dense technical terminal.
 
 ## Anti-references
 
-Avoid crypto-casino aesthetics, generic SaaS gradients, playful finance illustrations, excessive whitespace, washed-out gray text, ornamental glass effects, rainbow status chips, and marketing-page card grids. Do not make LLM agents look like autonomous trade execution authority; risk gates and deterministic controls stay visually clear.
+Avoid intimidating terminal dashboards, hacker-green palettes, crypto-casino styling, generic SaaS gradients, cramped metadata, tiny uppercase labels, excessive monospace typography, and unexplained agent jargon. Do not make LLM agents look like autonomous trade execution authority; risk gates and deterministic controls stay clear.
 
 ## Design Principles
 
-1. Signal before decoration: every color, badge, chart, and panel must improve decision speed.
-2. Dense but legible: compress vertical space while preserving strong scan lanes and accessible contrast.
-3. Terminal trust: use a restrained dark cockpit language with precise borders, monospace data, and clear state semantics.
-4. Explain the gate: surface confidence, conflict, invalidation, risk, and backtest provenance near the decision.
-5. Same vocabulary everywhere: buttons, panels, badges, tables, forms, and empty states should look like one system.
+1. Beginner clarity first: explain signals in plain language and keep next actions obvious.
+2. Familiar product patterns: use social feeds, boards, approachable cards, tabs, and TradingView-like market widgets.
+3. Light and calm by default: soft backgrounds, white cards, readable text, restrained blue/green accents.
+4. Progressive detail: show high-level decisions first, advanced evidence second.
+5. Same vocabulary everywhere: buttons, panels, badges, tables, forms, and empty states should look like one friendly system.
 
 ## Accessibility & Inclusion
 
-Target WCAG AA contrast. Preserve keyboard-visible focus, semantic headings, skip navigation, reduced-motion safety, and non-color-only status communication for buy/sell/hold/risk states.
+Target WCAG AA contrast. Preserve keyboard-visible focus, semantic headings, skip navigation, reduced-motion safety, readable font sizes, and non-color-only status communication for buy/sell/hold/risk states.
