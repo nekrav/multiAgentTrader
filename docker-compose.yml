@@ -40,14 +40,18 @@ services:
       PORT: ${PORT:-4000}
       DATABASE_URL: ${DATABASE_URL:-postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      JWT_SECRET: ${JWT_SECRET:-dev_change_me}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://127.0.0.1:3000}
+      JWT_SECRET: ${JWT_SECRET:-aitraders-dev-secret-change-me-32-chars}
       SIGNUP_CREDITS: ${SIGNUP_CREDITS:-50}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       RUN_TIMEOUT_MS: ${RUN_TIMEOUT_MS:-120000}
       RUNS_CONCURRENCY: ${RUNS_CONCURRENCY:-4}
       AGENT_ENDPOINTS_JSON: '${AGENT_ENDPOINTS_JSON:-{"market-data":"http://market-data-agent:7001","strategy-research":"http://strategy-research-agent:7002","event-analysis":"http://event-analysis-agent:7006","risk":"http://risk-agent:7003","execution":"http://execution-agent:7004","post-trade-review":"http://post-trade-review-agent:7005"}}'
       NEWS_FEED_PATH: ${NEWS_FEED_PATH:-/data/news/latest-news.json}
+      LIVE_PRICE_REFRESH_MS: ${LIVE_PRICE_REFRESH_MS:-15000}
+      LIVE_PRICE_TTL_MS: ${LIVE_PRICE_TTL_MS:-30000}
+      FXSTREET_RSS_REFRESH_MS: ${FXSTREET_RSS_REFRESH_MS:-300000}
+      FXSTREET_RSS_SIGNAL_TTL_MS: ${FXSTREET_RSS_SIGNAL_TTL_MS:-1800000}
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:
@@ -155,6 +159,62 @@ services:
       dockerfile: agents/post-trade-review/Dockerfile
     ports:
       - "127.0.0.1:7005:7005"
+
+  futures-worker:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: apps/futures-worker/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      PUBLISH_MODE: ${PUBLISH_MODE:-db}
+      MARKETS: ${MARKETS:-CL,GC}
+      FUTURES_TIMEFRAMES: ${FUTURES_TIMEFRAMES:-1H,4H,1D}
+      FUTURES_RUN_INTERVAL_SECONDS: ${FUTURES_RUN_INTERVAL_SECONDS:-300}
+    ports:
+      - "127.0.0.1:7011:7011"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request\nurllib.request.urlopen('http://127.0.0.1:7011/health/ready', timeout=3).read()\nPY"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  options-worker:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: apps/options-worker/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgres://aitraders:aitraders_dev_password@postgres:5432/aitraders}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      PUBLISH_MODE: ${PUBLISH_MODE:-db}
+      OPTIONS_UNDERLYINGS: ${OPTIONS_UNDERLYINGS:-GC_OPTIONS}
+      OPTIONS_TIMEFRAMES: ${OPTIONS_TIMEFRAMES:-1D}
+      OPTIONS_RUN_INTERVAL_SECONDS: ${OPTIONS_RUN_INTERVAL_SECONDS:-300}
+    ports:
+      - "127.0.0.1:7012:7012"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request\nurllib.request.urlopen('http://127.0.0.1:7012/health/ready', timeout=3).read()\nPY"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:

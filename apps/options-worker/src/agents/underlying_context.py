@@ -1,0 +1,2 @@
+def run_underlying_context_agent(market: str, timeframe: str, timestamp: str, underlying_bias: str="neutral", confidence: float=0.55) -> dict:
+    return {"market":market,"instrument_type":"option","timeframe":timeframe,"timestamp":timestamp,"agent_key":"options_underlying_context","bias":underlying_bias,"confidence":confidence,"score":round(confidence*10,1),"summary":f"Underlying context is {underlying_bias}.","risk_flags":[],"features":{"underlying_confidence":confidence},"model_version":"options_underlying_context_v1"}

@@ -36,7 +36,7 @@ Start here when exploring this area:
 - **`SignalCarousel`** (Function) — `apps/web/app/signal-carousel.tsx:44`
 - **`round`** (Function) — `apps/api/src/intelligence/intelligence.data.ts:520`
 - **`AdminPage`** (Function) — `apps/web/app/admin/page.tsx:26`
-- **`TopNav`** (Function) — `apps/web/app/top-nav.tsx:82`
+- **`TopNav`** (Function) — `apps/web/app/top-nav.tsx:83`
 
 ## Key Symbols
 
@@ -46,7 +46,7 @@ Start here when exploring this area:
 | `SignalCarousel` | Function | `apps/web/app/signal-carousel.tsx` | 44 |
 | `round` | Function | `apps/api/src/intelligence/intelligence.data.ts` | 520 |
 | `AdminPage` | Function | `apps/web/app/admin/page.tsx` | 26 |
-| `TopNav` | Function | `apps/web/app/top-nav.tsx` | 82 |
+| `TopNav` | Function | `apps/web/app/top-nav.tsx` | 83 |
 | `getToken` | Function | `apps/web/app/lib/api.ts` | 12 |
 | `clearToken` | Function | `apps/web/app/lib/api.ts` | 20 |
 | `AgentsDashboard` | Function | `apps/web/app/agents-dashboard.tsx` | 72 |
@@ -76,7 +76,7 @@ Start here when exploring this area:
 | `StocksPage → EmptyDashboard` | cross_community | 4 |
 | `StocksPage → Matches` | cross_community | 4 |
 | `StocksPage → MarketLabel` | cross_community | 4 |
-| `CryptoPage → EmptyDashboard` | cross_community | 4 |
+| `ForexPage → EmptyDashboard` | cross_community | 4 |
 
 ## Connected Areas
 

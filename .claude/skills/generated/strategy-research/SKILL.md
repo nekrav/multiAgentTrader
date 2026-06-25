@@ -48,6 +48,8 @@ Start here when exploring this area:
 | `Do_POST → As_float` | cross_community | 6 |
 | `Do_POST → As_int` | cross_community | 6 |
 | `Do_POST → Normalize_strategies` | cross_community | 4 |
+| `Do_POST → Extract_nested` | cross_community | 3 |
+| `Do_POST → Summarize` | cross_community | 3 |
 
 ## Connected Areas
 

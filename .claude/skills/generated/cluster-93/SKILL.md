@@ -1,9 +1,9 @@
 ---
-name: cluster-84
-description: "Skill for the Cluster_84 area of multiAgentTrader. 5 symbols across 1 files."
+name: cluster-93
+description: "Skill for the Cluster_93 area of multiAgentTrader. 5 symbols across 1 files."
 ---
 
-# Cluster_84
+# Cluster_93
 
 5 symbols | 1 files | Cohesion: 100%
 
@@ -11,7 +11,7 @@ description: "Skill for the Cluster_84 area of multiAgentTrader. 5 symbols acros
 
 - Working with code in `apps/`
 - Understanding how coalesce, isFxPair, toYahooSymbol work
-- Modifying cluster_84-related functionality
+- Modifying cluster_93-related functionality
 
 ## Key Files
 
@@ -42,5 +42,5 @@ Start here when exploring this area:
 ## How to Explore
 
 1. `gitnexus_context({name: "coalesce"})` — see callers and callees
-2. `gitnexus_query({query: "cluster_84"})` — find related execution flows
+2. `gitnexus_query({query: "cluster_93"})` — find related execution flows
 3. Read key files listed above for implementation details

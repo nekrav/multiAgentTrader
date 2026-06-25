@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { BrowserClock } from "./browser-clock";
+import { DashboardWorkspaceMenu } from "./dashboard-workspace-menu";
 import { LiveHomeDashboard } from "./live-home-dashboard";
 import { TerminalChartPanel } from "./terminal-chart-panel-client";
 import { TopNav } from "./top-nav";
@@ -215,43 +216,47 @@ export default async function Home() {
     <main className="shell intelligenceShell" id="main-content">
       <TopNav />
 
-      <LiveHomeDashboard initialDashboard={dashboard} initialCandlesBySymbol={initialCandlesBySymbol} />
+      <div className="dashboardWithWorkspaceMenu">
+        <DashboardSectionHub
+          marketCounts={{
+            forex: forexMarkets.length,
+            crypto: cryptoMarkets.length,
+            stocks: stockMarkets.length,
+          }}
+          watchlistCount={dashboard.watchlist.length}
+          eventCount={dashboard.events.length}
+          alertCount={dashboard.alerts.length}
+          reportCount={dashboard.reports.length}
+          catalogCount={catalog.length}
+        />
 
-      <BeginnerSnapshot
-        primary={primaryRecommendation}
-        marketCount={dashboard.markets.length}
-        conflictCount={conflictCount}
-        highRiskCount={highRiskCount}
-      />
+        <div className="dashboardMainStack">
+          <LiveHomeDashboard initialDashboard={dashboard} initialCandlesBySymbol={initialCandlesBySymbol} />
 
-      <TraderDecisionPanel
-        primary={primaryRecommendation}
-        primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
-        secondary={secondaryRecommendations}
-        secondaryCandles={Object.fromEntries(
-          secondaryRecommendations.map((rec) => [rec.symbol, initialCandlesBySymbol[rec.symbol] ?? []])
-        )}
-        watchlist={dashboard.watchlist}
-        alerts={dashboard.alerts.slice(0, 2)}
-        events={dashboard.events.slice(0, 2)}
-        reports={dashboard.reports.slice(0, 2)}
-        marketCount={dashboard.markets.length}
-        conflictCount={conflictCount}
-        highRiskCount={highRiskCount}
-      />
+          <BeginnerSnapshot
+            primary={primaryRecommendation}
+            marketCount={dashboard.markets.length}
+            conflictCount={conflictCount}
+            highRiskCount={highRiskCount}
+          />
 
-      <DashboardSectionHub
-        marketCounts={{
-          forex: forexMarkets.length,
-          crypto: cryptoMarkets.length,
-          stocks: stockMarkets.length,
-        }}
-        watchlistCount={dashboard.watchlist.length}
-        eventCount={dashboard.events.length}
-        alertCount={dashboard.alerts.length}
-        reportCount={dashboard.reports.length}
-        catalogCount={catalog.length}
-      />
+          <TraderDecisionPanel
+            primary={primaryRecommendation}
+            primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
+            secondary={secondaryRecommendations}
+            secondaryCandles={Object.fromEntries(
+              secondaryRecommendations.map((rec) => [rec.symbol, initialCandlesBySymbol[rec.symbol] ?? []])
+            )}
+            watchlist={dashboard.watchlist}
+            alerts={dashboard.alerts.slice(0, 2)}
+            events={dashboard.events.slice(0, 2)}
+            reports={dashboard.reports.slice(0, 2)}
+            marketCount={dashboard.markets.length}
+            conflictCount={conflictCount}
+            highRiskCount={highRiskCount}
+          />
+        </div>
+      </div>
     </main>
   );
 }
@@ -353,6 +358,13 @@ function DashboardSectionHub({
       meta: `${marketCounts.stocks} markets`,
     },
     {
+      href: "/derivatives",
+      eyebrow: "Markets",
+      title: "Futures And Options",
+      summary: "Derivatives workers, futures signals, options intelligence, and cross-asset hedging context.",
+      meta: "Derivatives desk",
+    },
+    {
       href: "/strategies",
       eyebrow: "Strategy",
       title: "Playbook",
@@ -398,23 +410,7 @@ function DashboardSectionHub({
 
   return (
     <section className="dashboardSectionHub">
-      <div className="sectionHeader">
-        <div>
-          <p className="eyebrow">Dashboard Pages</p>
-          <h2>Grouped Trading Workspaces</h2>
-        </div>
-        <span className="quiet">Open one focused page at a time</span>
-      </div>
-      <div className="dashboardSectionGrid">
-        {sections.map((section) => (
-          <a className="dashboardSectionCard" href={section.href} key={section.href}>
-            <span>{section.eyebrow}</span>
-            <strong>{section.title}</strong>
-            <p>{section.summary}</p>
-            <small>{section.meta}</small>
-          </a>
-        ))}
-      </div>
+      <DashboardWorkspaceMenu sections={sections} />
     </section>
   );
 }

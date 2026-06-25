@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { clearToken, getToken, apiFetch } from "./lib/api";
+import { useAuth } from "./auth-provider";
 
 const navGroups = [
   {
@@ -11,6 +11,7 @@ const navGroups = [
       { href: "/forex", label: "Forex" },
       { href: "/crypto", label: "Crypto" },
       { href: "/stocks", label: "Stocks" },
+      { href: "/derivatives", label: "Futures & Options" },
       { href: "/cross-market", label: "Cross-Market" },
     ],
   },
@@ -42,17 +43,6 @@ const navGroups = [
   },
 ];
 
-type Account = {
-  user: {
-    email: string;
-    displayName: string | null;
-    role: "user" | "admin";
-  };
-  balance: {
-    balance: string;
-  };
-};
-
 type Theme = "dark" | "light";
 type DesignMode = "technical" | "simple";
 
@@ -82,21 +72,9 @@ function saveCookie(name: string, value: string) {
 
 export function TopNav() {
   const apiHealthUrl = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/health`;
-  const [account, setAccount] = useState<Account | null>(null);
+  const { user, balance } = useAuth();
   const [theme, setTheme] = useState<Theme>("dark");
   const [designMode, setDesignMode] = useState<DesignMode>("technical");
-
-  useEffect(() => {
-    if (!getToken()) {
-      return;
-    }
-    void apiFetch<Account>("/auth/me")
-      .then(setAccount)
-      .catch(() => {
-        clearToken();
-        setAccount(null);
-      });
-  }, []);
 
   useEffect(() => {
     const savedTheme = readThemeCookie();
@@ -125,7 +103,7 @@ export function TopNav() {
     setDesignMode(nextDesignMode);
   }
 
-  const displayName = account?.user.displayName || account?.user.email.split("@")[0];
+  const displayName = user?.displayName || user?.email.split("@")[0];
   const initials = displayName
     ? displayName
         .split(/\s+/)
@@ -190,13 +168,13 @@ export function TopNav() {
             <span aria-hidden="true">{theme === "light" ? "L" : "D"}</span>
             <strong>{theme === "light" ? "Light" : "Dark"}</strong>
           </button>
-          <a className="accountAvatar" href={account ? "/account" : "/login"} aria-label="Open account">
+          <a className="accountAvatar" href={user ? "/account" : "/login"} aria-label="Open account">
             <span className="avatarCircle" aria-hidden="true">
               {initials}
             </span>
             <span className="accountText">
               <strong>{displayName ?? "Login"}</strong>
-              <small>{account ? `${account.balance.balance} credits` : "Credits"}</small>
+              <small>{user ? `${balance?.balance ?? "0"} credits` : "Credits"}</small>
             </span>
           </a>
         </div>

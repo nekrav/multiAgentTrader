@@ -47,6 +47,7 @@ Start here when exploring this area:
 | `Do_POST → Normalize_surprise` | cross_community | 4 |
 | `Do_POST → HistoricalEventTemplate` | cross_community | 4 |
 | `Do_POST → Jaccard` | cross_community | 4 |
+| `Do_POST → Serialize_comparable` | cross_community | 3 |
 
 ## Connected Areas
 
