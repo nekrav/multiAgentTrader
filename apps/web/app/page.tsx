@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { BrowserClock } from "./browser-clock";
+import { DashboardWorkspaceMenu } from "./dashboard-workspace-menu";
 import { LiveHomeDashboard } from "./live-home-dashboard";
+import { TerminalChartPanel } from "./terminal-chart-panel-client";
 import { TopNav } from "./top-nav";
 
 type Bias = "bullish" | "bearish" | "neutral";
@@ -203,7 +205,10 @@ export default async function Home() {
   const initialLiveSymbols = getInitialLiveSymbols(dashboard, tradeRecommendations);
   const initialCandlesBySymbol = Object.fromEntries(
     await Promise.all(
-      initialLiveSymbols.map(async (symbol) => [symbol, await getJson<Candle[]>(`/markets/${symbol}/candles`, [])] as const),
+      initialLiveSymbols.map(async (symbol) => [
+        symbol,
+        await getJson<Candle[]>(`/markets/${encodeURIComponent(symbol)}/candles`, []),
+      ] as const),
     ),
   );
 
@@ -211,34 +216,100 @@ export default async function Home() {
     <main className="shell intelligenceShell" id="main-content">
       <TopNav />
 
-      <LiveHomeDashboard initialDashboard={dashboard} initialCandlesBySymbol={initialCandlesBySymbol} />
+      <div className="dashboardWithWorkspaceMenu">
+        <DashboardSectionHub
+          marketCounts={{
+            forex: forexMarkets.length,
+            crypto: cryptoMarkets.length,
+            stocks: stockMarkets.length,
+          }}
+          watchlistCount={dashboard.watchlist.length}
+          eventCount={dashboard.events.length}
+          alertCount={dashboard.alerts.length}
+          reportCount={dashboard.reports.length}
+          catalogCount={catalog.length}
+        />
 
-      <TraderDecisionPanel
-        primary={primaryRecommendation}
-        primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
-        secondary={secondaryRecommendations}
-        watchlist={dashboard.watchlist}
-        alerts={dashboard.alerts.slice(0, 2)}
-        events={dashboard.events.slice(0, 2)}
-        reports={dashboard.reports.slice(0, 2)}
-        marketCount={dashboard.markets.length}
-        conflictCount={conflictCount}
-        highRiskCount={highRiskCount}
-      />
+        <div className="dashboardMainStack">
+          <LiveHomeDashboard initialDashboard={dashboard} initialCandlesBySymbol={initialCandlesBySymbol} />
 
-      <DashboardSectionHub
-        marketCounts={{
-          forex: forexMarkets.length,
-          crypto: cryptoMarkets.length,
-          stocks: stockMarkets.length,
-        }}
-        watchlistCount={dashboard.watchlist.length}
-        eventCount={dashboard.events.length}
-        alertCount={dashboard.alerts.length}
-        reportCount={dashboard.reports.length}
-        catalogCount={catalog.length}
-      />
+          <BeginnerSnapshot
+            primary={primaryRecommendation}
+            marketCount={dashboard.markets.length}
+            conflictCount={conflictCount}
+            highRiskCount={highRiskCount}
+          />
+
+          <TraderDecisionPanel
+            primary={primaryRecommendation}
+            primaryCandles={initialCandlesBySymbol[primaryRecommendation?.symbol ?? ""] ?? []}
+            secondary={secondaryRecommendations}
+            secondaryCandles={Object.fromEntries(
+              secondaryRecommendations.map((rec) => [rec.symbol, initialCandlesBySymbol[rec.symbol] ?? []])
+            )}
+            watchlist={dashboard.watchlist}
+            alerts={dashboard.alerts.slice(0, 2)}
+            events={dashboard.events.slice(0, 2)}
+            reports={dashboard.reports.slice(0, 2)}
+            marketCount={dashboard.markets.length}
+            conflictCount={conflictCount}
+            highRiskCount={highRiskCount}
+          />
+        </div>
+      </div>
     </main>
+  );
+}
+
+function BeginnerSnapshot({
+  primary,
+  marketCount,
+  conflictCount,
+  highRiskCount,
+}: {
+  primary?: TradeRecommendation;
+  marketCount: number;
+  conflictCount: number;
+  highRiskCount: number;
+}) {
+  const move = primary?.move ?? "Watch";
+  const confidence = primary ? formatPercent(primary.recommendationScore) : "n/a";
+  const riskLine = highRiskCount > 0
+    ? `${highRiskCount} risky market${highRiskCount === 1 ? "" : "s"} flagged`
+    : "No high-risk markets flagged";
+
+  return (
+    <section className="beginnerSnapshot" aria-label="Beginner friendly market summary">
+      <div className="beginnerHeroCopy">
+        <span>Simple View</span>
+        <h1>Today’s easiest read</h1>
+        <p>
+          A calmer dashboard that explains the next move in plain English. Use Technical when you want the full trading desk back.
+        </p>
+      </div>
+      <div className={`beginnerActionCard move-${move.toLowerCase()}`}>
+        <span>Top idea</span>
+        <strong>{primary ? `${move} ${primary.label}` : "No clear move yet"}</strong>
+        <small>{primary ? primary.summary : "Waiting for agent agreement across markets."}</small>
+      </div>
+      <div className="beginnerSteps">
+        <div>
+          <span>1</span>
+          <strong>Check direction</strong>
+          <small>{confidence} confidence from the agents</small>
+        </div>
+        <div>
+          <span>2</span>
+          <strong>Check risk</strong>
+          <small>{riskLine}</small>
+        </div>
+        <div>
+          <span>3</span>
+          <strong>Open details</strong>
+          <small>{conflictCount} conflict{conflictCount === 1 ? "" : "s"} across {marketCount} markets</small>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -287,6 +358,13 @@ function DashboardSectionHub({
       meta: `${marketCounts.stocks} markets`,
     },
     {
+      href: "/derivatives",
+      eyebrow: "Markets",
+      title: "Futures And Options",
+      summary: "Derivatives workers, futures signals, options intelligence, and cross-asset hedging context.",
+      meta: "Derivatives desk",
+    },
+    {
       href: "/strategies",
       eyebrow: "Strategy",
       title: "Playbook",
@@ -299,13 +377,6 @@ function DashboardSectionHub({
       title: "Run Analysis",
       summary: "Guided agent workbench with dropdowns, strategy inputs, indicator selections, and advanced JSON.",
       meta: `${catalogCount} agent tasks`,
-    },
-    {
-      href: "/pricing-sources",
-      eyebrow: "Operations",
-      title: "Pricing Sources",
-      summary: "Verify each market price against the live references and fallback mapping used in dashboard feeds.",
-      meta: "Price transparency",
     },
     {
       href: "/reports",
@@ -339,23 +410,7 @@ function DashboardSectionHub({
 
   return (
     <section className="dashboardSectionHub">
-      <div className="sectionHeader">
-        <div>
-          <p className="eyebrow">Dashboard Pages</p>
-          <h2>Grouped Trading Workspaces</h2>
-        </div>
-        <span className="quiet">Open one focused page at a time</span>
-      </div>
-      <div className="dashboardSectionGrid">
-        {sections.map((section) => (
-          <a className="dashboardSectionCard" href={section.href} key={section.href}>
-            <span>{section.eyebrow}</span>
-            <strong>{section.title}</strong>
-            <p>{section.summary}</p>
-            <small>{section.meta}</small>
-          </a>
-        ))}
-      </div>
+      <DashboardWorkspaceMenu sections={sections} />
     </section>
   );
 }
@@ -571,6 +626,7 @@ function TraderDecisionPanel({
   primary,
   primaryCandles,
   secondary,
+  secondaryCandles,
   watchlist,
   alerts,
   events,
@@ -582,6 +638,7 @@ function TraderDecisionPanel({
   primary?: TradeRecommendation;
   primaryCandles: Candle[];
   secondary: TradeRecommendation[];
+  secondaryCandles: Record<string, Candle[]>;
   watchlist: DashboardMarket[];
   alerts: Dashboard["alerts"];
   events: Dashboard["events"];
@@ -590,6 +647,11 @@ function TraderDecisionPanel({
   conflictCount: number;
   highRiskCount: number;
 }) {
+  const chartEntries = [
+    ...(primary ? [{ recommendation: primary, candles: primaryCandles }] : []),
+    ...secondary.map((rec) => ({ recommendation: rec, candles: secondaryCandles[rec.symbol] ?? [] })),
+  ];
+
   return (
     <section className="terminalHero">
       <aside className="terminalRail">
@@ -612,52 +674,7 @@ function TraderDecisionPanel({
         </div>
       </aside>
 
-      <div className={`terminalChartPanel ${primary ? `move-${primary.move.toLowerCase()}` : ""}`}>
-        <div className="tradePanelTop">
-          <div>
-            <p className="eyebrow">Agent Trade Desk</p>
-            <h1>{primary ? `${primary.move} ${primary.label}` : "No actionable recommendation"}</h1>
-          </div>
-          {primary ? (
-            <div className="decisionStack">
-              <span className={`moveBadge move-${primary.move.toLowerCase()}`}>{primary.move}</span>
-              <small>{formatPercent(primary.consensus.finalConfidence)} confidence</small>
-            </div>
-          ) : null}
-        </div>
-
-        {primary ? (
-          <>
-            <div className="terminalChartFrame">
-              <TradeHeroChart candles={primaryCandles} positive={primary.changePct >= 0} />
-              <div className="chartOverlay">
-                <span>{primary.label}</span>
-                <strong>{formatPrice(primary.price)}</strong>
-                <small className={primary.changePct >= 0 ? "positive" : "negative"}>{formatSignedPercent(primary.changePct)}</small>
-              </div>
-              <div className="signalRail" aria-label="Agent recommendation quality">
-                <SignalPill label="Score" value={formatPercent(primary.recommendationScore)} />
-                <SignalPill label="Agree" value={formatPercent(primary.consensus.agreementScore)} />
-                <SignalPill label="Confirm" value={formatPercent(primary.dependency.confirmationScore)} />
-                <SignalPill label="Conflict" value={formatPercent(primary.dependency.conflictScore)} danger />
-              </div>
-            </div>
-            <p className="tradeSummary">{primary.summary}</p>
-            <div className="tradeRationale">
-              <div>
-                <span>Agent Rationale</span>
-                <strong>{primary.dependency.summary}</strong>
-              </div>
-              <div>
-                <span>Invalidation</span>
-                <strong>{primary.consensus.invalidation}</strong>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p className="tradeSummary">No market currently clears the directional confidence filter.</p>
-        )}
-      </div>
+      <TerminalChartPanel entries={chartEntries} />
 
       <aside className="terminalIntelPanel">
         <div className="terminalPanelTitle">
@@ -788,12 +805,22 @@ function StackedMarkets({ markets, conflict = false }: { markets: DashboardMarke
 }
 
 function getInitialLiveSymbols(dashboard: Dashboard, opportunities: TradeRecommendation[]) {
-  const symbols = new Set<string>();
-  [...opportunities, ...dashboard.watchlist].forEach((market) => symbols.add(market.symbol));
-  return dashboard.markets
-    .filter((market) => symbols.has(market.symbol))
-    .slice(0, 8)
-    .map((market) => market.symbol);
+  const prioritizedSymbols: string[] = [
+    ...opportunities.slice(0, 4).map((market) => market.symbol),
+    ...dashboard.watchlist.map((market) => market.symbol),
+    ...opportunities.map((market) => market.symbol),
+  ];
+
+  const dashboardSymbols = new Set(dashboard.markets.map((market) => market.symbol));
+  const symbols: string[] = [];
+
+  for (const symbol of prioritizedSymbols) {
+    if (!symbols.includes(symbol) && dashboardSymbols.has(symbol) && symbols.length < 8) {
+      symbols.push(symbol);
+    }
+  }
+
+  return symbols;
 }
 
 function buildTradeRecommendations(markets: DashboardMarket[]): TradeRecommendation[] {

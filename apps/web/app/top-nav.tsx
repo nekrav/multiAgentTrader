@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { clearToken, getToken, apiFetch } from "./lib/api";
+import { useAuth } from "./auth-provider";
 
 const navGroups = [
   {
@@ -11,6 +11,7 @@ const navGroups = [
       { href: "/forex", label: "Forex" },
       { href: "/crypto", label: "Crypto" },
       { href: "/stocks", label: "Stocks" },
+      { href: "/derivatives", label: "Futures & Options" },
       { href: "/cross-market", label: "Cross-Market" },
     ],
   },
@@ -27,7 +28,6 @@ const navGroups = [
     items: [
       { href: "/run", label: "Run Analysis" },
       { href: "/backtesting", label: "Backtesting" },
-      { href: "/pricing-sources", label: "Pricing Sources" },
       { href: "/setups", label: "Trade Setups" },
       { href: "/history", label: "Saved Analyses" },
       { href: "/alerts", label: "Alerts" },
@@ -43,66 +43,67 @@ const navGroups = [
   },
 ];
 
-type Account = {
-  user: {
-    email: string;
-    displayName: string | null;
-    role: "user" | "admin";
-  };
-  balance: {
-    balance: string;
-  };
-};
-
 type Theme = "dark" | "light";
+type DesignMode = "technical" | "simple";
 
 const themeCookieName = "aitraders-theme";
+const designCookieName = "aitraders-design";
+
+function readCookie(name: string) {
+  return document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${name}=`))
+    ?.split("=")[1];
+}
 
 function readThemeCookie(): Theme | null {
-  const cookie = document.cookie
-    .split("; ")
-    .find((entry) => entry.startsWith(`${themeCookieName}=`));
-  const value = cookie?.split("=")[1];
+  const value = readCookie(themeCookieName);
   return value === "light" || value === "dark" ? value : null;
 }
 
-function saveThemeCookie(theme: Theme) {
-  document.cookie = `${themeCookieName}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax`;
+function readDesignCookie(): DesignMode | null {
+  const value = readCookie(designCookieName);
+  return value === "simple" || value === "technical" ? value : null;
+}
+
+function saveCookie(name: string, value: string) {
+  document.cookie = `${name}=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 export function TopNav() {
   const apiHealthUrl = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/health`;
-  const [account, setAccount] = useState<Account | null>(null);
+  const { user, balance } = useAuth();
   const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    if (!getToken()) {
-      return;
-    }
-    void apiFetch<Account>("/auth/me")
-      .then(setAccount)
-      .catch(() => {
-        clearToken();
-        setAccount(null);
-      });
-  }, []);
+  const [designMode, setDesignMode] = useState<DesignMode>("technical");
 
   useEffect(() => {
     const savedTheme = readThemeCookie();
     const activeTheme =
       savedTheme ?? (document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    const savedDesign = readDesignCookie();
+    const activeDesign =
+      savedDesign ?? (document.documentElement.dataset.design === "simple" ? "simple" : "technical");
     document.documentElement.dataset.theme = activeTheme;
+    document.documentElement.dataset.design = activeDesign;
     setTheme(activeTheme);
+    setDesignMode(activeDesign);
   }, []);
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "light" ? "dark" : "light";
     document.documentElement.dataset.theme = nextTheme;
-    saveThemeCookie(nextTheme);
+    saveCookie(themeCookieName, nextTheme);
     setTheme(nextTheme);
   }
 
-  const displayName = account?.user.displayName || account?.user.email.split("@")[0];
+  function toggleDesignMode() {
+    const nextDesignMode: DesignMode = designMode === "simple" ? "technical" : "simple";
+    document.documentElement.dataset.design = nextDesignMode;
+    saveCookie(designCookieName, nextDesignMode);
+    setDesignMode(nextDesignMode);
+  }
+
+  const displayName = user?.displayName || user?.email.split("@")[0];
   const initials = displayName
     ? displayName
         .split(/\s+/)
@@ -148,6 +149,16 @@ export function TopNav() {
         </div>
         <div className="navActions">
           <button
+            className="designToggle"
+            type="button"
+            aria-label={`Switch to ${designMode === "simple" ? "technical" : "beginner friendly"} design`}
+            aria-pressed={designMode === "simple"}
+            onClick={toggleDesignMode}
+          >
+            <span aria-hidden="true">{designMode === "simple" ? "B" : "T"}</span>
+            <strong>{designMode === "simple" ? "Beginner" : "Technical"}</strong>
+          </button>
+          <button
             className="themeToggle"
             type="button"
             aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
@@ -157,13 +168,13 @@ export function TopNav() {
             <span aria-hidden="true">{theme === "light" ? "L" : "D"}</span>
             <strong>{theme === "light" ? "Light" : "Dark"}</strong>
           </button>
-          <a className="accountAvatar" href={account ? "/account" : "/login"} aria-label="Open account">
+          <a className="accountAvatar" href={user ? "/account" : "/login"} aria-label="Open account">
             <span className="avatarCircle" aria-hidden="true">
               {initials}
             </span>
             <span className="accountText">
               <strong>{displayName ?? "Login"}</strong>
-              <small>{account ? `${account.balance.balance} credits` : "Credits"}</small>
+              <small>{user ? `${balance?.balance ?? "0"} credits` : "Credits"}</small>
             </span>
           </a>
         </div>

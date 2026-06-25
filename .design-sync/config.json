@@ -1,0 +1,5 @@
+{
+  "projectId": "eb74e1f8-ccfa-4fb4-8d57-ce56a6adbc8c",
+  "shape": "package",
+  "note": "off-script: no isolated component-library build exists in this repo (apps/web is a single Next.js app). Manually scoped to design tokens + a small set of standalone presentational components."
+}

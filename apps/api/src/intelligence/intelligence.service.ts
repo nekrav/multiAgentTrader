@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { Injectable, NotFoundException, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { FxstreetRssService } from "./fxstreet-rss.service";
 import {
   alerts,
   buildAgentOutputs,
@@ -34,8 +35,8 @@ type ExternalNewsAlert = {
 export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
   private readonly newsFeedPath = process.env.NEWS_FEED_PATH ?? "/data/news/latest-news.json";
   private readonly refreshIntervalMs = Number(process.env.ANALYSIS_REFRESH_MS ?? 60_000);
-  private readonly livePriceRefreshMs = Number(process.env.LIVE_PRICE_REFRESH_MS ?? this.refreshIntervalMs);
-  private readonly livePriceTtlMs = Number(process.env.LIVE_PRICE_TTL_MS ?? this.refreshIntervalMs * 3);
+  private readonly livePriceRefreshMs = Number(process.env.LIVE_PRICE_REFRESH_MS ?? 15_000);
+  private readonly livePriceTtlMs = Number(process.env.LIVE_PRICE_TTL_MS ?? 30_000);
   private readonly livePriceBySymbol = new Map<string, { price: number; updatedAt: number }>();
   private readonly priorLivePriceBySymbol = new Map<string, number>();
   private readonly marketDataEndpoint = this.getMarketDataEndpoint();
@@ -50,6 +51,8 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
     ["EURGBP", "EUR/GBP"],
     ["EURJPY", "EUR/JPY"],
     ["GBPJPY", "GBP/JPY"],
+    ["XAUUSD", "XAU/USD"],
+    ["USOIL", "WTI"],
     ["BTCUSD", "BTC"],
     ["ETHUSD", "ETH"],
   ]);
@@ -60,9 +63,10 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
   private analysisSnapshot = this.buildAnalysisSnapshot("startup");
   private refreshingMarketPrices = false;
 
-  constructor() {}
+  constructor(private readonly fxstreetRss: FxstreetRssService) {}
 
   async onModuleInit() {
+    await this.fxstreetRss.refreshNow("startup");
     await this.refreshMarketPrices("startup");
     this.refreshAnalysis("startup");
     this.refreshTimer = setInterval(() => this.refreshAnalysis("interval"), this.refreshIntervalMs);
@@ -277,6 +281,16 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
     return {
       candles: { status: "minute-refresh", lagSeconds },
       news: this.getNewsIngestionStatus(),
+      fxstreet: this.fxstreetRss.getStatus(),
+      marketData: {
+        status: "quote-provider",
+        source: this.marketDataEndpoint,
+        cadenceSeconds: Math.round(this.livePriceRefreshMs / 1000),
+        staleAfterSeconds: Math.round(this.livePriceTtlMs / 1000),
+        freshSymbols: Array.from(this.livePriceBySymbol.entries())
+          .filter(([, value]) => Date.now() - value.updatedAt <= this.livePriceTtlMs)
+          .map(([symbol]) => symbol),
+      },
       calendar: { status: "minute-refresh", lagSeconds },
       dependencies: { status: "config-driven", count: dependencies.length },
       analysis: {
@@ -440,7 +454,7 @@ export class IntelligenceService implements OnModuleInit, OnModuleDestroy {
     try {
       await Promise.allSettled(
         Array.from(this.liveAssetBySymbol.entries()).map(async ([symbol, asset]) => {
-          const spotPrice = await this.fetchLiveMarketPrice(asset);
+          const spotPrice = (await this.fetchLiveMarketPrice(asset)) ?? this.fxstreetRss.getFreshPrice(symbol)?.price;
           if (spotPrice === undefined || spotPrice <= 0 || Number.isNaN(spotPrice)) {
             return;
           }

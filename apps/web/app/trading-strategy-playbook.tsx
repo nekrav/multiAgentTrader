@@ -430,20 +430,6 @@ const patternPlans: PatternPlan[] = [
   },
 ];
 
-const sources = [
-  { label: "FOREX.com chart patterns", href: "https://www.forex.com/en-us/learn-forex-trading/11-chart-patterns-you-should-know/" },
-  { label: "Investopedia forex patterns", href: "https://www.investopedia.com/articles/forex/11/most-used-forex-patterns.asp" },
-  { label: "Investopedia RSI", href: "https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp" },
-  { label: "Investopedia MACD", href: "https://www.investopedia.com/terms/m/macd.asp" },
-  { label: "Investopedia Bollinger Bands", href: "https://www.investopedia.com/terms/b/bollingerbands.asp" },
-  { label: "Investopedia MA + MACD combo", href: "https://www.investopedia.com/articles/forex/08/macd-combo.asp" },
-  { label: "Investopedia ADX", href: "https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp" },
-  { label: "OANDA moving averages", href: "https://www.oanda.com/us-en/trade-tap-blog/trading-knowledge/identify-trends-with-moving-averages/" },
-  { label: "StockCharts Bollinger squeeze", href: "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/bollinger-band-squeeze" },
-  { label: "OANDA head and shoulders", href: "https://www.oanda.com/us-en/trade-tap-blog/analysis/technical/chart-patterns-how-to-trade-head-and-shoulders-pattern/" },
-  { label: "TD Bollinger + MACD", href: "https://www.td.com/ca/en/investing/direct-investing/articles/bollinger-bands-and-macds" },
-  { label: "StockCharts candlestick dictionary", href: "https://chartschool.stockcharts.com/table-of-contents/chart-analysis/candlestick-charts/candlestick-pattern-dictionary" },
-];
 
 export function TradingStrategyPlaybook({ compact = false }: { compact?: boolean }) {
   const visiblePatterns = compact ? patternPlans.slice(0, 6) : patternPlans;
@@ -586,19 +572,11 @@ export function TradingStrategyPlaybook({ compact = false }: { compact?: boolean
         ))}
       </div>
 
-      {!compact ? (
-        <div className="sourceStrip" aria-label="Research sources">
-          {sources.map((source) => (
-            <a href={source.href} key={source.href}>
-              {source.label}
-            </a>
-          ))}
-        </div>
-      ) : (
+      {compact ? (
         <a className="apiLink strategyMoreLink" href="/strategies">
           Open full playbook
         </a>
-      )}
+      ) : null}
     </section>
   );
 }

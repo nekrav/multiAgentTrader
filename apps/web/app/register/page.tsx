@@ -9,8 +9,8 @@ export default function RegisterPage() {
         <p className="eyebrow">Account</p>
         <h1>Create Account</h1>
         <LoginForm mode="register" />
-        <a className="backLink" href="/login">
-          Log in
+        <a className="primaryButton authAltButton" href="/login">
+          Log In
         </a>
       </section>
     </main>

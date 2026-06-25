@@ -5,6 +5,7 @@ import { AuthSupportModule } from "./auth/auth-support.module";
 import { CatalogModule } from "./catalog/catalog.module";
 import { CreditsModule } from "./credits/credits.module";
 import { DatabaseModule } from "./database/database.module";
+import { DerivativesModule } from "./derivatives/derivatives.module";
 import { HealthModule } from "./health/health.module";
 import { IntelligenceModule } from "./intelligence/intelligence.module";
 import { RunsModule } from "./runs/runs.module";
@@ -20,6 +21,7 @@ import { UsersModule } from "./users/users.module";
     AgentsModule,
     CatalogModule,
     RunsModule,
+    DerivativesModule,
     HealthModule,
     IntelligenceModule,
   ],

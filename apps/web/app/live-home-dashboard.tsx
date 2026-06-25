@@ -81,7 +81,7 @@ export function LiveHomeDashboard({
         ).slice(0, 8);
         const candleEntries = await Promise.all(
           symbols.map(async (symbol) => {
-            const response = await fetch(`${apiUrl}/markets/${symbol}/candles`, { cache: "no-store" });
+            const response = await fetch(`${apiUrl}/markets/${encodeURIComponent(symbol)}/candles`, { cache: "no-store" });
             if (!response.ok) {
               return [symbol, []] as const;
             }
